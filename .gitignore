@@ -1,0 +1,10 @@
+.omx
+
+# backend
+backend/.idea
+backend/target
+
+# frontend
+frontend/.idea
+frontend/dist
+frontend/node_modules

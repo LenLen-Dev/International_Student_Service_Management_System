@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.mapper.SysUserMapper">
+    <resultMap id="SysUserResultMap" type="com.wenjie.entity.SysUser">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="real_name"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="userType" column="user_type"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <resultMap id="SysMenuResultMap" type="com.wenjie.entity.SysMenu">
+        <id property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="menuType" column="menu_type"/>
+        <result property="permissionCode" column="permission_code"/>
+        <result property="path" column="path"/>
+        <result property="component" column="component"/>
+        <result property="icon" column="icon"/>
+        <result property="visible" column="visible"/>
+        <result property="status" column="status"/>
+        <result property="sort" column="sort"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, username, password, real_name, email, phone, user_type, status, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectById" resultMap="SysUserResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByUsername" resultMap="SysUserResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        WHERE username = #{username} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectList" resultMap="SysUserResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        WHERE deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (username LIKE CONCAT('%', #{keyword}, '%') OR real_name LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="userType != null and userType != ''">
+            AND user_type = #{userType}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.wenjie.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, real_name, email, phone, user_type, status)
+        VALUES (#{username}, #{password}, #{realName}, #{email}, #{phone}, #{userType}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.wenjie.entity.SysUser">
+        UPDATE sys_user
+        <set>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            email = #{email},
+            phone = #{phone},
+            <if test="userType != null and userType != ''">user_type = #{userType},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE sys_user SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_user SET status = #{status}, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectRoleCodesByUserId" resultType="string">
+        SELECT DISTINCT r.role_code
+        FROM sys_role r
+        INNER JOIN sys_user_role ur ON ur.role_id = r.id AND ur.deleted = 0
+        WHERE ur.user_id = #{userId} AND r.deleted = 0 AND r.status = 1
+    </select>
+
+    <select id="selectPermissionsByUserId" resultType="string">
+        SELECT DISTINCT m.permission_code
+        FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON rm.menu_id = m.id AND rm.deleted = 0
+        INNER JOIN sys_user_role ur ON ur.role_id = rm.role_id AND ur.deleted = 0
+        INNER JOIN sys_role r ON r.id = ur.role_id AND r.deleted = 0 AND r.status = 1
+        WHERE ur.user_id = #{userId}
+          AND m.deleted = 0
+          AND m.status = 1
+          AND m.permission_code IS NOT NULL
+          AND m.permission_code != ''
+    </select>
+
+    <select id="selectMenusByUserId" resultMap="SysMenuResultMap">
+        SELECT DISTINCT m.id, m.parent_id, m.menu_name, m.menu_type, m.permission_code, m.path, m.component,
+               m.icon, m.visible, m.status, m.sort, m.create_time, m.update_time, m.deleted
+        FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON rm.menu_id = m.id AND rm.deleted = 0
+        INNER JOIN sys_user_role ur ON ur.role_id = rm.role_id AND ur.deleted = 0
+        INNER JOIN sys_role r ON r.id = ur.role_id AND r.deleted = 0 AND r.status = 1
+        WHERE ur.user_id = #{userId}
+          AND m.deleted = 0
+          AND m.status = 1
+          AND m.visible = 1
+          AND m.menu_type IN ('CATALOG', 'MENU')
+        ORDER BY m.sort ASC, m.id ASC
+    </select>
+</mapper>

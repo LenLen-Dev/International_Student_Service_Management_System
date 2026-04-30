@@ -1,0 +1,35 @@
+.el-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 5%);
+}
+
+.el-button + .el-button {
+  margin-left: 8px;
+}
+
+.el-table {
+  --el-table-header-bg-color: #f8fafc;
+  --el-table-header-text-color: #334155;
+}
+
+.el-dialog {
+  border-radius: 8px;
+}
+
+.el-dialog__header {
+  padding: 18px 22px 12px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.el-dialog__body {
+  padding: 22px;
+}
+
+.el-dialog__footer {
+  padding: 12px 22px 20px;
+}
+
+.el-form-item__label {
+  font-weight: 500;
+}

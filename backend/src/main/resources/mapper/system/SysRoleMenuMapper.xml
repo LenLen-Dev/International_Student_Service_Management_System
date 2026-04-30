@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.mapper.SysRoleMenuMapper">
+    <update id="deleteByRoleId">
+        UPDATE sys_role_menu SET deleted = 1, update_time = NOW() WHERE role_id = #{roleId} AND deleted = 0
+    </update>
+
+    <insert id="insertBatch">
+        INSERT INTO sys_role_menu (role_id, menu_id)
+        VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (#{roleId}, #{menuId})
+        </foreach>
+        ON DUPLICATE KEY UPDATE deleted = 0, update_time = NOW()
+    </insert>
+
+    <select id="selectMenuIdsByRoleId" resultType="long">
+        SELECT menu_id FROM sys_role_menu WHERE role_id = #{roleId} AND deleted = 0 ORDER BY menu_id ASC
+    </select>
+</mapper>
