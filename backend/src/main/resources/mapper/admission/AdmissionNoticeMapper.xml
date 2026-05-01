@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.admission.mapper.AdmissionNoticeMapper">
+    <resultMap id="AdmissionNoticeResultMap" type="com.wenjie.modules.admission.entity.AdmissionNotice">
+        <id property="id" column="id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="noticeNo" column="notice_no"/>
+        <result property="fileName" column="file_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="issueDate" column="issue_date"/>
+        <result property="issuerId" column="issuer_id"/>
+        <result property="issuerName" column="issuer_name"/>
+        <result property="downloadCount" column="download_count"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.wenjie.modules.admission.entity.AdmissionNotice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admission_notice (application_id, notice_no, file_name, file_path, issue_date, issuer_id, issuer_name, download_count)
+        VALUES (#{applicationId}, #{noticeNo}, #{fileName}, #{filePath}, #{issueDate}, #{issuerId}, #{issuerName}, #{downloadCount})
+    </insert>
+
+    <update id="incrementDownloadCount">
+        UPDATE admission_notice SET download_count = download_count + 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectByApplicationId" resultMap="AdmissionNoticeResultMap">
+        SELECT id, application_id, notice_no, file_name, file_path, issue_date, issuer_id, issuer_name, download_count, deleted, create_time, update_time
+        FROM admission_notice
+        WHERE application_id = #{applicationId} AND deleted = 0
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+</mapper>

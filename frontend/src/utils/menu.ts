@@ -9,25 +9,42 @@ const pathMap: Record<string, string> = {
   '/system/users': '/system/user',
   '/system/roles': '/system/role',
   '/system/menus': '/system/menu',
-  '/student/profile': '/student/profiles'
+  '/student/profile': '/student/profiles',
+  '/admission/applications/me': '/admission/my-application',
+  '/admission/applications': '/admission/review'
 }
 
 const componentMap: Record<string, string> = {
   'system/users/index': 'system/user/index',
   'system/roles/index': 'system/role/index',
   'system/menus/index': 'system/menu/index',
-  'student/profiles/index': 'student/profile/index'
+  'student/profiles/index': 'student/profile/index',
+  'admission/applications/me/index': 'admission/my-application/index',
+  'admission/my-application/index': 'admission/my-application/index',
+  'admission/applications/index': 'admission/review/index',
+  'admission/review/index': 'admission/review/index'
 }
 
 export const iconMap: Record<string, string> = {
   system: 'Setting',
+  config: 'Setting',
   setting: 'Setting',
   user: 'User',
   role: 'Key',
   key: 'Key',
   menu: 'Menu',
+  flow: 'Share',
+  share: 'Share',
+  log: 'Document',
+  backup: 'Folder',
+  folder: 'Folder',
   dashboard: 'House',
   home: 'House',
+  admission: 'Tickets',
+  apply: 'EditPen',
+  review: 'Checked',
+  tickets: 'Tickets',
+  checked: 'Checked',
   document: 'Document',
   school: 'School',
   office: 'OfficeBuilding'

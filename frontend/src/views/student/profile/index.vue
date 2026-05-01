@@ -439,6 +439,7 @@ import { computed, defineComponent, h, nextTick, onMounted, reactive, ref } from
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElButton, ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Plus, Refresh, Search, User, View } from '@element-plus/icons-vue'
+import { getDictOptions } from '@/api/config/dict'
 import {
   createStudentContact,
   createStudentDocument,
@@ -472,29 +473,30 @@ import type {
   StudentProfileQuery,
   StudentStatusUpdateForm
 } from '@/types/student'
+import type { DictOption } from '@/types/config'
 
-type Option = { label: string; value: string }
+type Option = DictOption
 
-const genderOptions: Option[] = [
+const genderOptions = reactive<Option[]>([
   { label: '男', value: 'MALE' },
   { label: '女', value: 'FEMALE' },
   { label: '未知', value: 'UNKNOWN' }
-]
-const studentStatusOptions: Option[] = [
+])
+const studentStatusOptions = reactive<Option[]>([
   { label: '预录取', value: 'PRE_ADMITTED' },
   { label: '在读', value: 'ENROLLED' },
   { label: '休学', value: 'SUSPENDED' },
   { label: '已毕业', value: 'GRADUATED' },
   { label: '退学', value: 'DROPPED' },
   { label: '已离校', value: 'LEFT' }
-]
-const contactTypeOptions: Option[] = [
+])
+const contactTypeOptions = reactive<Option[]>([
   { label: '紧急联系人', value: 'EMERGENCY' },
   { label: '家庭联系人', value: 'FAMILY' },
   { label: '监护人', value: 'GUARDIAN' },
   { label: '其他', value: 'OTHER' }
-]
-const documentTypeOptions: Option[] = [
+])
+const documentTypeOptions = reactive<Option[]>([
   { label: '护照', value: 'PASSPORT' },
   { label: '照片', value: 'PHOTO' },
   { label: '录取通知书', value: 'ADMISSION_NOTICE' },
@@ -503,12 +505,12 @@ const documentTypeOptions: Option[] = [
   { label: '体检证明', value: 'PHYSICAL_EXAM' },
   { label: '保险材料', value: 'INSURANCE' },
   { label: '其他', value: 'OTHER' }
-]
-const documentReviewStatusOptions: Option[] = [
+])
+const documentReviewStatusOptions = reactive<Option[]>([
   { label: '待审核', value: 'PENDING' },
   { label: '已通过', value: 'APPROVED' },
   { label: '已拒绝', value: 'REJECTED' }
-]
+])
 
 const searchForm = reactive<StudentProfileQuery>({ pageNum: 1, pageSize: 10, status: '' })
 const pageQuery = reactive({ pageNum: 1, pageSize: 10 })
@@ -630,7 +632,34 @@ function formatOption(options: Option[], value?: string) {
   return options.find((item) => item.value === value)?.label || value || '-'
 }
 
+function replaceOptions(target: Option[], options: Option[]) {
+  if (options.length) {
+    target.splice(0, target.length, ...options)
+  }
+}
+
+async function loadDictOptions() {
+  try {
+    const [gender, studentStatus, contactType, documentType, documentReviewStatus] = await Promise.all([
+      getDictOptions('gender'),
+      getDictOptions('student_status'),
+      getDictOptions('contact_type'),
+      getDictOptions('document_type'),
+      getDictOptions('document_review_status')
+    ])
+    replaceOptions(genderOptions, gender)
+    replaceOptions(studentStatusOptions, studentStatus)
+    replaceOptions(contactTypeOptions, contactType)
+    replaceOptions(documentTypeOptions, documentType)
+    replaceOptions(documentReviewStatusOptions, documentReviewStatus)
+  } catch {
+    // 字典接口异常时保留本地兜底选项。
+  }
+}
+
 function studentStatusTag(status?: string) {
+  const dictTag = studentStatusOptions.find((item) => item.value === status)?.tagType
+  if (dictTag) return dictTag as 'success' | 'warning' | 'info' | 'danger' | 'primary'
   const map: Record<string, 'success' | 'warning' | 'info' | 'danger' | 'primary'> = {
     PRE_ADMITTED: 'primary',
     ENROLLED: 'success',
@@ -643,6 +672,8 @@ function studentStatusTag(status?: string) {
 }
 
 function documentStatusTag(status?: string) {
+  const dictTag = documentReviewStatusOptions.find((item) => item.value === status)?.tagType
+  if (dictTag) return dictTag as 'success' | 'warning' | 'info' | 'danger' | 'primary'
   if (status === 'APPROVED') return 'success'
   if (status === 'REJECTED') return 'danger'
   return 'warning'
@@ -958,7 +989,10 @@ async function deleteDocumentRow(row: StudentDocument) {
   }
 }
 
-onMounted(loadProfiles)
+onMounted(async () => {
+  await loadDictOptions()
+  await loadProfiles()
+})
 </script>
 
 <style scoped lang="scss">

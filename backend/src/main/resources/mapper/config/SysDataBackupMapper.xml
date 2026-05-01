@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.config.mapper.SysDataBackupMapper">
+    <resultMap id="SysDataBackupResultMap" type="com.wenjie.modules.config.entity.SysDataBackup">
+        <id property="id" column="id"/>
+        <result property="backupName" column="backup_name"/>
+        <result property="fileName" column="file_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="backupStatus" column="backup_status"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="costTime" column="cost_time"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, backup_name, file_name, file_path, file_size, backup_status, start_time, end_time, cost_time,
+        operator_id, operator_name, error_message, remark, create_time, update_time, deleted
+    </sql>
+
+    <sql id="QueryWhere">
+        WHERE deleted = 0
+        <if test="backupName != null and backupName != ''">
+            AND backup_name LIKE CONCAT('%', #{backupName}, '%')
+        </if>
+        <if test="backupStatus != null and backupStatus != ''">
+            AND backup_status = #{backupStatus}
+        </if>
+    </sql>
+
+    <select id="selectById" resultMap="SysDataBackupResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sys_data_backup WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectPage" resultMap="SysDataBackupResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_data_backup
+        <include refid="QueryWhere"/>
+        ORDER BY id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_data_backup
+        <include refid="QueryWhere"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wenjie.modules.config.entity.SysDataBackup" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_data_backup
+        (backup_name, file_name, file_path, file_size, backup_status, start_time, end_time, cost_time,
+         operator_id, operator_name, error_message, remark)
+        VALUES
+        (#{backupName}, #{fileName}, #{filePath}, #{fileSize}, #{backupStatus}, #{startTime}, #{endTime}, #{costTime},
+         #{operatorId}, #{operatorName}, #{errorMessage}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.wenjie.modules.config.entity.SysDataBackup">
+        UPDATE sys_data_backup
+        <set>
+            backup_name = #{backupName},
+            file_name = #{fileName},
+            file_path = #{filePath},
+            file_size = #{fileSize},
+            backup_status = #{backupStatus},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            cost_time = #{costTime},
+            operator_id = #{operatorId},
+            operator_name = #{operatorName},
+            error_message = #{errorMessage},
+            remark = #{remark},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE sys_data_backup SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+</mapper>

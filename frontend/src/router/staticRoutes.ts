@@ -36,6 +36,58 @@ export const staticRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/admission',
+    component: Layout,
+    redirect: '/admission/my-application',
+    meta: { title: '招生申请管理', icon: 'Tickets' },
+    children: [
+      {
+        path: 'my-application',
+        name: 'AdmissionMyApplication',
+        component: () => import('@/views/admission/my-application/index.vue'),
+        meta: { title: '我的申请', icon: 'EditPen', permission: 'admission:application:my' }
+      },
+      {
+        path: 'review',
+        name: 'AdmissionReview',
+        component: () => import('@/views/admission/review/index.vue'),
+        meta: { title: '申请审核', icon: 'Checked', permission: 'admission:application:list' }
+      }
+    ]
+  },
+  {
+    path: '/config',
+    component: Layout,
+    redirect: '/config/dict',
+    meta: { title: '系统配置与审计', icon: 'Setting' },
+    children: [
+      {
+        path: 'dict',
+        name: 'ConfigDict',
+        component: () => import('@/views/config/dict/index.vue'),
+        meta: { title: '字典配置', icon: 'Menu', permission: 'config:dict:list' }
+      },
+      {
+        path: 'flow',
+        name: 'ConfigFlow',
+        component: () => import('@/views/config/flow/index.vue'),
+        meta: { title: '流程配置', icon: 'Share', permission: 'config:flow:list' }
+      },
+      {
+        path: 'log',
+        name: 'ConfigLog',
+        component: () => import('@/views/config/log/index.vue'),
+        meta: { title: '操作日志', icon: 'Document', permission: 'audit:operation-log:list' }
+      },
+      {
+        path: 'backup',
+        name: 'ConfigBackup',
+        component: () => import('@/views/config/backup/index.vue'),
+        meta: { title: '数据备份', icon: 'Folder', permission: 'config:backup:list' }
+      }
+    ]
+  },
+  {
     path: '/404',
     name: 'NotFound',
     component: () => import('@/views/dashboard/index.vue'),

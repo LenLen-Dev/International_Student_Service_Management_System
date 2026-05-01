@@ -93,6 +93,7 @@ const modules = [
   {
     title: '招生申请',
     description: '招生申请、材料审核与录取流程入口',
+    path: '/admission',
     icon: Document,
     color: 'blue'
   },
@@ -105,6 +106,12 @@ const modules = [
 ]
 
 function openModule(module: (typeof modules)[number]) {
+  if (module.path === '/admission') {
+    const target = userStore.permissions.includes('admission:application:list') ? '/admission/review' : '/admission/my-application'
+    router.push(target)
+    return
+  }
+
   if (module.path) {
     router.push(module.path)
     return

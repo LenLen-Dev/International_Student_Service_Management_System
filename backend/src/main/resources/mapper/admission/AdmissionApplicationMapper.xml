@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.admission.mapper.AdmissionApplicationMapper">
+    <resultMap id="AdmissionApplicationResultMap" type="com.wenjie.modules.admission.entity.AdmissionApplication">
+        <id property="id" column="id"/>
+        <result property="applicationNo" column="application_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="gender" column="gender"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="nationality" column="nationality"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="passportNo" column="passport_no"/>
+        <result property="passportCountry" column="passport_country"/>
+        <result property="passportExpireDate" column="passport_expire_date"/>
+        <result property="applyCollege" column="apply_college"/>
+        <result property="applyMajor" column="apply_major"/>
+        <result property="degreeLevel" column="degree_level"/>
+        <result property="programType" column="program_type"/>
+        <result property="educationBackground" column="education_background"/>
+        <result property="applicationStatus" column="application_status"/>
+        <result property="admissionStatus" column="admission_status"/>
+        <result property="reviewOpinion" column="review_opinion"/>
+        <result property="studentProfileId" column="student_profile_id"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, application_no, user_id, chinese_name, english_name, gender, birth_date, nationality, email, phone,
+        passport_no, passport_country, passport_expire_date, apply_college, apply_major, degree_level, program_type,
+        education_background, application_status, admission_status, review_opinion, student_profile_id, remark,
+        deleted, create_time, update_time
+    </sql>
+
+    <sql id="QueryWhere">
+        WHERE deleted = 0
+        <if test="applicationNo != null and applicationNo != ''">
+            AND application_no LIKE CONCAT('%', #{applicationNo}, '%')
+        </if>
+        <if test="name != null and name != ''">
+            AND (chinese_name LIKE CONCAT('%', #{name}, '%') OR english_name LIKE CONCAT('%', #{name}, '%'))
+        </if>
+        <if test="nationality != null and nationality != ''">
+            AND nationality = #{nationality}
+        </if>
+        <if test="applyCollege != null and applyCollege != ''">
+            AND apply_college LIKE CONCAT('%', #{applyCollege}, '%')
+        </if>
+        <if test="applyMajor != null and applyMajor != ''">
+            AND apply_major LIKE CONCAT('%', #{applyMajor}, '%')
+        </if>
+        <if test="applicationStatus != null and applicationStatus != ''">
+            AND application_status = #{applicationStatus}
+        </if>
+        <if test="admissionStatus != null and admissionStatus != ''">
+            AND admission_status = #{admissionStatus}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.admission.entity.AdmissionApplication" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admission_application (
+            application_no, user_id, chinese_name, english_name, gender, birth_date, nationality, email, phone,
+            passport_no, passport_country, passport_expire_date, apply_college, apply_major, degree_level, program_type,
+            education_background, application_status, admission_status, review_opinion, student_profile_id, remark
+        ) VALUES (
+            #{applicationNo}, #{userId}, #{chineseName}, #{englishName}, #{gender}, #{birthDate}, #{nationality}, #{email}, #{phone},
+            #{passportNo}, #{passportCountry}, #{passportExpireDate}, #{applyCollege}, #{applyMajor}, #{degreeLevel}, #{programType},
+            #{educationBackground}, #{applicationStatus}, #{admissionStatus}, #{reviewOpinion}, #{studentProfileId}, #{remark}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.admission.entity.AdmissionApplication">
+        UPDATE admission_application
+        <set>
+            chinese_name = #{chineseName},
+            <if test="englishName != null and englishName != ''">english_name = #{englishName},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            birth_date = #{birthDate},
+            <if test="nationality != null and nationality != ''">nationality = #{nationality},</if>
+            email = #{email},
+            phone = #{phone},
+            passport_no = #{passportNo},
+            passport_country = #{passportCountry},
+            passport_expire_date = #{passportExpireDate},
+            apply_college = #{applyCollege},
+            apply_major = #{applyMajor},
+            degree_level = #{degreeLevel},
+            program_type = #{programType},
+            education_background = #{educationBackground},
+            remark = #{remark},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateStatus">
+        UPDATE admission_application
+        SET application_status = #{applicationStatus},
+            admission_status = #{admissionStatus},
+            review_opinion = #{reviewOpinion},
+            student_profile_id = #{studentProfileId},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="AdmissionApplicationResultMap">
+        SELECT <include refid="BaseColumns"/> FROM admission_application WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="AdmissionApplicationResultMap">
+        SELECT <include refid="BaseColumns"/> FROM admission_application WHERE user_id = #{userId} AND deleted = 0 ORDER BY id DESC LIMIT 1
+    </select>
+
+    <select id="selectByApplicationNo" resultMap="AdmissionApplicationResultMap">
+        SELECT <include refid="BaseColumns"/> FROM admission_application WHERE application_no = #{applicationNo} AND deleted = 0 LIMIT 1
+    </select>
+
+    <select id="selectPage" resultMap="AdmissionApplicationResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM admission_application
+        <include refid="QueryWhere"/>
+        ORDER BY id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM admission_application
+        <include refid="QueryWhere"/>
+    </select>
+</mapper>

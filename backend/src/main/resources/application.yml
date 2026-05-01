@@ -32,3 +32,7 @@ sa-token:
   token-style: uuid
   is-log: false
   jwt-secret-key: international-student-service-management-system-jwt-secret-key-change-me
+
+app:
+  upload-dir: uploads
+  notice-font-path: C:/Windows/Fonts/simsun.ttc

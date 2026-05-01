@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.config.mapper.SysFlowNodeMapper">
+    <resultMap id="SysFlowNodeResultMap" type="com.wenjie.modules.config.entity.SysFlowNode">
+        <id property="id" column="id"/>
+        <result property="flowId" column="flow_id"/>
+        <result property="nodeName" column="node_name"/>
+        <result property="nodeCode" column="node_code"/>
+        <result property="nodeType" column="node_type"/>
+        <result property="approverRoleCode" column="approver_role_code"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="sort" column="sort"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, flow_id, node_name, node_code, node_type, approver_role_code, description, status, sort, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectByFlowId" resultMap="SysFlowNodeResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_flow_node
+        WHERE flow_id = #{flowId} AND deleted = 0
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.wenjie.modules.config.entity.SysFlowNode" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_flow_node (flow_id, node_name, node_code, node_type, approver_role_code, description, status, sort)
+        VALUES (#{flowId}, #{nodeName}, #{nodeCode}, #{nodeType}, #{approverRoleCode}, #{description}, #{status}, #{sort})
+    </insert>
+
+    <update id="logicalDeleteByFlowId">
+        UPDATE sys_flow_node SET deleted = 1, update_time = NOW() WHERE flow_id = #{flowId} AND deleted = 0
+    </update>
+</mapper>

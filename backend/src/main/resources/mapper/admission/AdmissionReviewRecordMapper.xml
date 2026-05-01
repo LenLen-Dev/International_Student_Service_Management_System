@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.admission.mapper.AdmissionReviewRecordMapper">
+    <resultMap id="AdmissionReviewRecordResultMap" type="com.wenjie.modules.admission.entity.AdmissionReviewRecord">
+        <id property="id" column="id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="actionType" column="action_type"/>
+        <result property="fromStatus" column="from_status"/>
+        <result property="toStatus" column="to_status"/>
+        <result property="opinion" column="opinion"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.wenjie.modules.admission.entity.AdmissionReviewRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admission_review_record (application_id, action_type, from_status, to_status, opinion, operator_id, operator_name)
+        VALUES (#{applicationId}, #{actionType}, #{fromStatus}, #{toStatus}, #{opinion}, #{operatorId}, #{operatorName})
+    </insert>
+
+    <select id="selectByApplicationId" resultMap="AdmissionReviewRecordResultMap">
+        SELECT id, application_id, action_type, from_status, to_status, opinion, operator_id, operator_name, deleted, create_time, update_time
+        FROM admission_review_record
+        WHERE application_id = #{applicationId} AND deleted = 0
+        ORDER BY id DESC
+    </select>
+</mapper>

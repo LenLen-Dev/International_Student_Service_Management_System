@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.config.mapper.SysOperationLogMapper">
+    <resultMap id="SysOperationLogResultMap" type="com.wenjie.modules.config.entity.SysOperationLog">
+        <id property="id" column="id"/>
+        <result property="moduleName" column="module_name"/>
+        <result property="operationType" column="operation_type"/>
+        <result property="operationName" column="operation_name"/>
+        <result property="requestMethod" column="request_method"/>
+        <result property="requestUri" column="request_uri"/>
+        <result property="controllerMethod" column="controller_method"/>
+        <result property="requestParams" column="request_params"/>
+        <result property="responseResult" column="response_result"/>
+        <result property="success" column="success"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="userAgent" column="user_agent"/>
+        <result property="costTime" column="cost_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, module_name, operation_type, operation_name, request_method, request_uri, controller_method,
+        request_params, response_result, success, error_message, operator_id, operator_name, ip_address,
+        user_agent, cost_time, create_time, update_time, deleted
+    </sql>
+
+    <sql id="QueryWhere">
+        WHERE deleted = 0
+        <if test="moduleName != null and moduleName != ''">
+            AND module_name LIKE CONCAT('%', #{moduleName}, '%')
+        </if>
+        <if test="operationType != null and operationType != ''">
+            AND operation_type = #{operationType}
+        </if>
+        <if test="operatorName != null and operatorName != ''">
+            AND operator_name LIKE CONCAT('%', #{operatorName}, '%')
+        </if>
+        <if test="success != null">
+            AND success = #{success}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </sql>
+
+    <select id="selectById" resultMap="SysOperationLogResultMap">
+        SELECT <include refid="BaseColumns"/> FROM sys_operation_log WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectPage" resultMap="SysOperationLogResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_operation_log
+        <include refid="QueryWhere"/>
+        ORDER BY id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_operation_log
+        <include refid="QueryWhere"/>
+    </select>
+
+    <insert id="insert" parameterType="com.wenjie.modules.config.entity.SysOperationLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_operation_log
+        (module_name, operation_type, operation_name, request_method, request_uri, controller_method,
+         request_params, response_result, success, error_message, operator_id, operator_name, ip_address,
+         user_agent, cost_time)
+        VALUES
+        (#{moduleName}, #{operationType}, #{operationName}, #{requestMethod}, #{requestUri}, #{controllerMethod},
+         #{requestParams}, #{responseResult}, #{success}, #{errorMessage}, #{operatorId}, #{operatorName},
+         #{ipAddress}, #{userAgent}, #{costTime})
+    </insert>
+
+    <update id="logicalDelete">
+        UPDATE sys_operation_log SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+</mapper>
