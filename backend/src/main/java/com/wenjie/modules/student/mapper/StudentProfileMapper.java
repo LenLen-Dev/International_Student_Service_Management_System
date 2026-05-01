@@ -31,4 +31,5 @@ public interface StudentProfileMapper {
     StudentProfile selectByStudentNo(@Param("studentNo") String studentNo);
     StudentProfile selectByUserId(@Param("userId") Long userId);
     int updateStatus(@Param("id") Long id, @Param("studentStatus") String studentStatus);
+    int updateAcademicFields(StudentProfile profile);
 }

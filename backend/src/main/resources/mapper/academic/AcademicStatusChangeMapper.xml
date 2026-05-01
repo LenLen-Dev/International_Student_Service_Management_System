@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.academic.mapper.AcademicStatusChangeMapper">
+    <resultMap id="AcademicStatusChangeResultMap" type="com.wenjie.modules.academic.entity.AcademicStatusChange">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="changeType" column="change_type"/>
+        <result property="oldStatus" column="old_status"/>
+        <result property="newStatus" column="new_status"/>
+        <result property="oldMajorId" column="old_major_id"/>
+        <result property="newMajorId" column="new_major_id"/>
+        <result property="oldGradeId" column="old_grade_id"/>
+        <result property="newGradeId" column="new_grade_id"/>
+        <result property="oldClassId" column="old_class_id"/>
+        <result property="newClassId" column="new_class_id"/>
+        <result property="effectiveDate" column="effective_date"/>
+        <result property="reason" column="reason"/>
+        <result property="changeStatus" column="change_status"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="approverName" column="approver_name"/>
+        <result property="approveTime" column="approve_time"/>
+        <result property="approveOpinion" column="approve_opinion"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="newMajorName" column="new_major_name"/>
+        <result property="newGradeName" column="new_grade_name"/>
+        <result property="newClassName" column="new_class_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        ch.id, ch.student_id, ch.change_type, ch.old_status, ch.new_status, ch.old_major_id, ch.new_major_id, ch.old_grade_id, ch.new_grade_id, ch.old_class_id, ch.new_class_id, ch.effective_date, ch.reason, ch.change_status, ch.approver_id, ch.approver_name, ch.approve_time, ch.approve_opinion, ch.remark, ch.deleted, ch.create_time, ch.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, nm.major_name new_major_name, ng.grade_name new_grade_name, nc.class_name new_class_name
+    </sql>
+    <sql id="QueryWhere">
+        WHERE ch.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.changeStatus != null and query.changeStatus != ''">AND ch.change_status=#{query.changeStatus}</if>
+        <if test="query.changeType != null and query.changeType != ''">AND ch.change_type=#{query.changeType}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.academic.entity.AcademicStatusChange" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO academic_status_change (student_id, change_type, old_status, new_status, old_major_id, new_major_id, old_grade_id, new_grade_id, old_class_id, new_class_id, effective_date, reason, change_status, remark)
+        VALUES (#{studentId}, #{changeType}, #{oldStatus}, #{newStatus}, #{oldMajorId}, #{newMajorId}, #{oldGradeId}, #{newGradeId}, #{oldClassId}, #{newClassId}, #{effectiveDate}, #{reason}, #{changeStatus}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.academic.entity.AcademicStatusChange">
+        UPDATE academic_status_change SET change_type=#{changeType}, new_status=#{newStatus}, new_major_id=#{newMajorId}, new_grade_id=#{newGradeId}, new_class_id=#{newClassId}, effective_date=#{effectiveDate}, reason=#{reason}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0 AND change_status='PENDING'
+    </update>
+    <update id="updateApproval" parameterType="com.wenjie.modules.academic.entity.AcademicStatusChange">
+        UPDATE academic_status_change SET change_status=#{changeStatus}, approver_id=#{approverId}, approver_name=#{approverName}, approve_time=#{approveTime}, approve_opinion=#{approveOpinion}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <select id="selectById" resultMap="AcademicStatusChangeResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_status_change ch
+        LEFT JOIN student_profile sp ON sp.id=ch.student_id AND sp.deleted=0
+        LEFT JOIN academic_major nm ON nm.id=ch.new_major_id AND nm.deleted=0
+        LEFT JOIN academic_grade ng ON ng.id=ch.new_grade_id AND ng.deleted=0
+        LEFT JOIN academic_class nc ON nc.id=ch.new_class_id AND nc.deleted=0
+        WHERE ch.id=#{id} AND ch.deleted=0
+    </select>
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1) FROM academic_status_change ch
+        LEFT JOIN student_profile sp ON sp.id=ch.student_id AND sp.deleted=0
+        LEFT JOIN academic_major nm ON nm.id=ch.new_major_id AND nm.deleted=0
+        LEFT JOIN academic_grade ng ON ng.id=ch.new_grade_id AND ng.deleted=0
+        LEFT JOIN academic_class nc ON nc.id=ch.new_class_id AND nc.deleted=0
+        <include refid="QueryWhere"/>
+    </select>
+    <select id="selectPage" resultMap="AcademicStatusChangeResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_status_change ch
+        LEFT JOIN student_profile sp ON sp.id=ch.student_id AND sp.deleted=0
+        LEFT JOIN academic_major nm ON nm.id=ch.new_major_id AND nm.deleted=0
+        LEFT JOIN academic_grade ng ON ng.id=ch.new_grade_id AND ng.deleted=0
+        LEFT JOIN academic_class nc ON nc.id=ch.new_class_id AND nc.deleted=0
+        <include refid="QueryWhere"/>
+        ORDER BY ch.create_time DESC, ch.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+</mapper>

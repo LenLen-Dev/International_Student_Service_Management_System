@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.academic.mapper.AcademicLeaveMapper">
+    <resultMap id="AcademicLeaveResultMap" type="com.wenjie.modules.academic.entity.AcademicLeaveApplication">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="leaveType" column="leave_type"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="reason" column="reason"/>
+        <result property="leaveStatus" column="leave_status"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="approverName" column="approver_name"/>
+        <result property="approveTime" column="approve_time"/>
+        <result property="approveOpinion" column="approve_opinion"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="className" column="class_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        l.id, l.student_id, l.leave_type, l.start_time, l.end_time, l.reason, l.leave_status, l.approver_id, l.approver_name, l.approve_time, l.approve_opinion, l.remark, l.deleted, l.create_time, l.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, c.class_name
+    </sql>
+    <sql id="QueryWhere">
+        WHERE l.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.leaveStatus != null and query.leaveStatus != ''">AND l.leave_status=#{query.leaveStatus}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.academic.entity.AcademicLeaveApplication" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO academic_leave_application (student_id, leave_type, start_time, end_time, reason, leave_status, remark)
+        VALUES (#{studentId}, #{leaveType}, #{startTime}, #{endTime}, #{reason}, #{leaveStatus}, #{remark})
+    </insert>
+    <update id="updateApproval" parameterType="com.wenjie.modules.academic.entity.AcademicLeaveApplication">
+        UPDATE academic_leave_application SET leave_status=#{leaveStatus}, approver_id=#{approverId}, approver_name=#{approverName}, approve_time=#{approveTime}, approve_opinion=#{approveOpinion}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <select id="selectById" resultMap="AcademicLeaveResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_leave_application l
+        LEFT JOIN student_profile sp ON sp.id=l.student_id AND sp.deleted=0
+        LEFT JOIN academic_student_record r ON r.student_id=l.student_id AND r.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        WHERE l.id=#{id} AND l.deleted=0
+    </select>
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1) FROM academic_leave_application l
+        LEFT JOIN student_profile sp ON sp.id=l.student_id AND sp.deleted=0
+        LEFT JOIN academic_student_record r ON r.student_id=l.student_id AND r.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        <include refid="QueryWhere"/>
+    </select>
+    <select id="selectPage" resultMap="AcademicLeaveResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_leave_application l
+        LEFT JOIN student_profile sp ON sp.id=l.student_id AND sp.deleted=0
+        LEFT JOIN academic_student_record r ON r.student_id=l.student_id AND r.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        <include refid="QueryWhere"/>
+        ORDER BY l.create_time DESC, l.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectByStudentId" resultMap="AcademicLeaveResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_leave_application l
+        LEFT JOIN student_profile sp ON sp.id=l.student_id AND sp.deleted=0
+        LEFT JOIN academic_student_record r ON r.student_id=l.student_id AND r.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        WHERE l.student_id=#{studentId} AND l.deleted=0 ORDER BY l.create_time DESC, l.id DESC
+    </select>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.teaching.mapper.TeachingEnrollmentMapper">
+    <resultMap id="TeachingEnrollmentResultMap" type="com.wenjie.modules.teaching.entity.TeachingCourseEnrollment">
+        <id property="id" column="id"/>
+        <result property="offeringId" column="offering_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="enrollmentStatus" column="enrollment_status"/>
+        <result property="selectTime" column="select_time"/>
+        <result property="dropTime" column="drop_time"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="courseCode" column="course_code"/>
+        <result property="courseName" column="course_name"/>
+        <result property="academicYear" column="academic_year"/>
+        <result property="semester" column="semester"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="classTime" column="class_time"/>
+        <result property="classroom" column="classroom"/>
+        <result property="offeringStatus" column="offering_status"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        e.id, e.offering_id, e.student_id, e.enrollment_status, e.select_time, e.drop_time, e.remark, e.deleted, e.create_time, e.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, c.course_code, c.course_name, o.academic_year, o.semester, o.teacher_name, o.class_time, o.classroom, o.offering_status
+    </sql>
+    <sql id="Joins">
+        FROM teaching_course_enrollment e
+        INNER JOIN teaching_course_offering o ON o.id=e.offering_id AND o.deleted=0
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        INNER JOIN student_profile sp ON sp.id=e.student_id AND sp.deleted=0
+    </sql>
+    <sql id="QueryWhere">
+        WHERE e.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%') OR c.course_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.offeringId != null">AND e.offering_id=#{query.offeringId}</if>
+        <if test="query.enrollmentStatus != null and query.enrollmentStatus != ''">AND e.enrollment_status=#{query.enrollmentStatus}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.teaching.entity.TeachingCourseEnrollment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO teaching_course_enrollment (offering_id, student_id, enrollment_status, select_time, remark)
+        VALUES (#{offeringId}, #{studentId}, #{enrollmentStatus}, #{selectTime}, #{remark})
+    </insert>
+    <update id="reselect">UPDATE teaching_course_enrollment SET enrollment_status='SELECTED', select_time=NOW(), drop_time=NULL, deleted=0, update_time=NOW() WHERE id=#{id}</update>
+    <update id="drop">UPDATE teaching_course_enrollment SET enrollment_status='DROPPED', drop_time=NOW(), update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <select id="selectById" resultMap="TeachingEnrollmentResultMap">SELECT <include refid="SelectColumns"/> <include refid="Joins"/> WHERE e.id=#{id} AND e.deleted=0</select>
+    <select id="selectByOfferingAndStudent" resultMap="TeachingEnrollmentResultMap">SELECT <include refid="SelectColumns"/> <include refid="Joins"/> WHERE e.offering_id=#{offeringId} AND e.student_id=#{studentId} AND e.deleted=0 LIMIT 1</select>
+    <select id="countPage" resultType="long">SELECT COUNT(1) <include refid="Joins"/> <include refid="QueryWhere"/></select>
+    <select id="selectPage" resultMap="TeachingEnrollmentResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        <include refid="QueryWhere"/>
+        ORDER BY e.create_time DESC, e.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectByStudent" resultMap="TeachingEnrollmentResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE e.student_id=#{studentId} AND e.deleted=0 ORDER BY e.create_time DESC, e.id DESC
+    </select>
+    <select id="selectSelectedByOffering" resultMap="TeachingEnrollmentResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE e.offering_id=#{offeringId} AND e.enrollment_status='SELECTED' AND e.deleted=0 ORDER BY sp.student_no ASC
+    </select>
+</mapper>

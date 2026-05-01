@@ -152,4 +152,18 @@
     <update id="updateStatus">
         UPDATE student_profile SET student_status = #{studentStatus}, update_time = NOW() WHERE id = #{id} AND deleted = 0
     </update>
+
+    <update id="updateAcademicFields" parameterType="com.wenjie.modules.student.entity.StudentProfile">
+        UPDATE student_profile
+        SET college = #{college},
+            major = #{major},
+            degree_level = #{degreeLevel},
+            grade = #{grade},
+            class_name = #{className},
+            enrollment_date = #{enrollmentDate},
+            expected_graduation_date = #{expectedGraduationDate},
+            student_status = #{studentStatus},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
 </mapper>

@@ -94,6 +94,100 @@ export const staticRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/academic',
+    component: Layout,
+    redirect: '/academic/major',
+    meta: { title: '学籍与在校管理', icon: 'School' },
+    children: [
+      {
+        path: 'major',
+        name: 'AcademicMajor',
+        component: () => import('@/views/academic/major/index.vue'),
+        meta: { title: '专业管理', icon: 'Collection', permission: 'academic:major:list' }
+      },
+      {
+        path: 'class',
+        name: 'AcademicClass',
+        component: () => import('@/views/academic/class/index.vue'),
+        meta: { title: '年级班级', icon: 'Grid', permission: 'academic:class:list' }
+      },
+      {
+        path: 'record',
+        name: 'AcademicRecord',
+        component: () => import('@/views/academic/record/index.vue'),
+        meta: { title: '学籍信息', icon: 'Tickets', permission: 'academic:record:list' }
+      },
+      {
+        path: 'leave',
+        name: 'AcademicLeave',
+        component: () => import('@/views/academic/leave/index.vue'),
+        meta: { title: '请假管理', icon: 'Calendar', permission: 'academic:leave:list' }
+      },
+      {
+        path: 'change',
+        name: 'AcademicChange',
+        component: () => import('@/views/academic/change/index.vue'),
+        meta: { title: '学籍异动', icon: 'Switch', permission: 'academic:change:list' }
+      },
+      {
+        path: 'my',
+        name: 'AcademicMy',
+        component: () => import('@/views/academic/my/index.vue'),
+        meta: { title: '我的学籍', icon: 'User', permission: 'academic:my:view' }
+      }
+    ]
+  },
+  {
+    path: '/teaching',
+    component: Layout,
+    redirect: '/teaching/course',
+    meta: { title: '教务与成绩管理', icon: 'Reading' },
+    children: [
+      {
+        path: 'course',
+        name: 'TeachingCourse',
+        component: () => import('@/views/teaching/course/index.vue'),
+        meta: { title: '课程信息', icon: 'Collection', permission: 'teaching:course:list' }
+      },
+      {
+        path: 'offering',
+        name: 'TeachingOffering',
+        component: () => import('@/views/teaching/offering/index.vue'),
+        meta: { title: '开课管理', icon: 'School', permission: 'teaching:offering:list' }
+      },
+      {
+        path: 'selection',
+        name: 'TeachingSelection',
+        component: () => import('@/views/teaching/selection/index.vue'),
+        meta: { title: '学生选课', icon: 'Checked', permission: 'teaching:selection:available' }
+      },
+      {
+        path: 'grade',
+        name: 'TeachingGrade',
+        component: () => import('@/views/teaching/grade/index.vue'),
+        meta: { title: '成绩管理', icon: 'Tickets', permission: 'teaching:grade:list' }
+      },
+      {
+        path: 'attendance',
+        name: 'TeachingAttendance',
+        component: () => import('@/views/teaching/attendance/index.vue'),
+        meta: { title: '出勤管理', icon: 'Calendar', permission: 'teaching:attendance:list' }
+      },
+      {
+        path: 'alert',
+        name: 'TeachingAlert',
+        component: () => import('@/views/teaching/alert/index.vue'),
+        meta: { title: '学业预警', icon: 'Warning', permission: 'teaching:alert:list' }
+      },
+      {
+        path: 'my',
+        name: 'TeachingMy',
+        component: () => import('@/views/teaching/my/index.vue'),
+        meta: { title: '我的教务', icon: 'User', permission: 'teaching:my:view' }
+      }
+    ]
+  },
+  {
     path: '/config',
     component: Layout,
     redirect: '/config/dict',

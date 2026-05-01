@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.academic.mapper.AcademicGradeMapper">
+    <resultMap id="AcademicGradeResultMap" type="com.wenjie.modules.academic.entity.AcademicGrade">
+        <id property="id" column="id"/>
+        <result property="gradeCode" column="grade_code"/>
+        <result property="gradeName" column="grade_name"/>
+        <result property="enrollmentYear" column="enrollment_year"/>
+        <result property="graduationYear" column="graduation_year"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <sql id="BaseColumns">id, grade_code, grade_name, enrollment_year, graduation_year, status, remark, deleted, create_time, update_time</sql>
+    <sql id="QueryWhere">
+        WHERE deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (grade_code LIKE CONCAT('%', #{query.keyword}, '%') OR grade_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.status != null">AND status = #{query.status}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.academic.entity.AcademicGrade" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO academic_grade (grade_code, grade_name, enrollment_year, graduation_year, status, remark)
+        VALUES (#{gradeCode}, #{gradeName}, #{enrollmentYear}, #{graduationYear}, #{status}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.academic.entity.AcademicGrade">
+        UPDATE academic_grade SET grade_code=#{gradeCode}, grade_name=#{gradeName}, enrollment_year=#{enrollmentYear}, graduation_year=#{graduationYear}, status=#{status}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <update id="deleteById">UPDATE academic_grade SET deleted=1, update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <select id="selectById" resultMap="AcademicGradeResultMap">SELECT <include refid="BaseColumns"/> FROM academic_grade WHERE id=#{id} AND deleted=0</select>
+    <select id="selectByCode" resultMap="AcademicGradeResultMap">SELECT <include refid="BaseColumns"/> FROM academic_grade WHERE grade_code=#{gradeCode} AND deleted=0 LIMIT 1</select>
+    <select id="countPage" resultType="long">SELECT COUNT(1) FROM academic_grade <include refid="QueryWhere"/></select>
+    <select id="selectPage" resultMap="AcademicGradeResultMap">SELECT <include refid="BaseColumns"/> FROM academic_grade <include refid="QueryWhere"/> ORDER BY enrollment_year DESC, id DESC LIMIT #{query.offset}, #{query.limit}</select>
+    <select id="selectAllEnabled" resultMap="AcademicGradeResultMap">SELECT <include refid="BaseColumns"/> FROM academic_grade WHERE deleted=0 AND status=1 ORDER BY enrollment_year DESC</select>
+    <select id="countUsed" resultType="int">SELECT COUNT(1) FROM academic_student_record WHERE grade_id=#{id} AND deleted=0</select>
+</mapper>

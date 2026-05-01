@@ -16,7 +16,23 @@ const pathMap: Record<string, string> = {
   '/visa/residence-permits': '/visa/permit',
   '/visa/renewals': '/visa/renewal',
   '/visa/alerts': '/visa/alert',
-  '/visa/me': '/visa/my'
+  '/visa/me': '/visa/my',
+  '/academic/majors': '/academic/major',
+  '/academic/classes': '/academic/class',
+  '/academic/grades': '/academic/class',
+  '/academic/records': '/academic/record',
+  '/academic/leaves': '/academic/leave',
+  '/academic/changes': '/academic/change',
+  '/academic/me': '/academic/my',
+  '/teaching/courses': '/teaching/course',
+  '/teaching/offerings': '/teaching/offering',
+  '/teaching/offerings/my': '/teaching/offering',
+  '/teaching/selections': '/teaching/selection',
+  '/teaching/selections/available': '/teaching/selection',
+  '/teaching/grades': '/teaching/grade',
+  '/teaching/attendance': '/teaching/attendance',
+  '/teaching/alerts': '/teaching/alert',
+  '/teaching/me': '/teaching/my'
 }
 
 const componentMap: Record<string, string> = {
@@ -36,7 +52,33 @@ const componentMap: Record<string, string> = {
   'visa/renewal/index': 'visa/renewal/index',
   'visa/alerts/index': 'visa/alert/index',
   'visa/alert/index': 'visa/alert/index',
-  'visa/my/index': 'visa/my/index'
+  'visa/my/index': 'visa/my/index',
+  'academic/majors/index': 'academic/major/index',
+  'academic/major/index': 'academic/major/index',
+  'academic/classes/index': 'academic/class/index',
+  'academic/grades/index': 'academic/class/index',
+  'academic/class/index': 'academic/class/index',
+  'academic/records/index': 'academic/record/index',
+  'academic/record/index': 'academic/record/index',
+  'academic/leaves/index': 'academic/leave/index',
+  'academic/leave/index': 'academic/leave/index',
+  'academic/changes/index': 'academic/change/index',
+  'academic/change/index': 'academic/change/index',
+  'academic/my/index': 'academic/my/index',
+  'teaching/courses/index': 'teaching/course/index',
+  'teaching/course/index': 'teaching/course/index',
+  'teaching/offerings/index': 'teaching/offering/index',
+  'teaching/offering/index': 'teaching/offering/index',
+  'teaching/offerings/my/index': 'teaching/offering/index',
+  'teaching/selections/index': 'teaching/selection/index',
+  'teaching/selections/available/index': 'teaching/selection/index',
+  'teaching/selection/index': 'teaching/selection/index',
+  'teaching/grades/index': 'teaching/grade/index',
+  'teaching/grade/index': 'teaching/grade/index',
+  'teaching/attendance/index': 'teaching/attendance/index',
+  'teaching/alerts/index': 'teaching/alert/index',
+  'teaching/alert/index': 'teaching/alert/index',
+  'teaching/my/index': 'teaching/my/index'
 }
 
 export const iconMap: Record<string, string> = {
@@ -68,7 +110,14 @@ export const iconMap: Record<string, string> = {
   alert: 'Warning',
   document: 'Document',
   school: 'School',
-  office: 'OfficeBuilding'
+  office: 'OfficeBuilding',
+  academic: 'School',
+  teaching: 'Reading',
+  reading: 'Reading',
+  collection: 'Collection',
+  grid: 'Grid',
+  calendar: 'Calendar',
+  switch: 'Switch'
 }
 
 export function normalizeMenuType(type: MenuType): 'CATALOG' | 'MENU' | 'BUTTON' {

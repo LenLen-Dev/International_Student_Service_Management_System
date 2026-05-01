@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.teaching.mapper.TeachingOfferingMapper">
+    <resultMap id="TeachingOfferingResultMap" type="com.wenjie.modules.teaching.entity.TeachingCourseOffering">
+        <id property="id" column="id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="teacherId" column="teacher_id"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="academicYear" column="academic_year"/>
+        <result property="semester" column="semester"/>
+        <result property="capacity" column="capacity"/>
+        <result property="selectedCount" column="selected_count"/>
+        <result property="selectionStartTime" column="selection_start_time"/>
+        <result property="selectionEndTime" column="selection_end_time"/>
+        <result property="classTime" column="class_time"/>
+        <result property="classroom" column="classroom"/>
+        <result property="offeringStatus" column="offering_status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="courseCode" column="course_code"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseType" column="course_type"/>
+        <result property="college" column="college"/>
+        <result property="credits" column="credits"/>
+        <result property="totalHours" column="total_hours"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        o.id, o.course_id, o.teacher_id, o.teacher_name, o.academic_year, o.semester, o.capacity, o.selected_count, o.selection_start_time, o.selection_end_time, o.class_time, o.classroom, o.offering_status, o.remark, o.deleted, o.create_time, o.update_time,
+        c.course_code, c.course_name, c.course_type, c.college, c.credits, c.total_hours
+    </sql>
+    <sql id="QueryWhere">
+        WHERE o.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (c.course_code LIKE CONCAT('%', #{query.keyword}, '%') OR c.course_name LIKE CONCAT('%', #{query.keyword}, '%') OR o.teacher_name LIKE CONCAT('%', #{query.keyword}, '%') OR o.classroom LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.courseId != null">AND o.course_id=#{query.courseId}</if>
+        <if test="query.teacherId != null">AND o.teacher_id=#{query.teacherId}</if>
+        <if test="query.academicYear != null and query.academicYear != ''">AND o.academic_year=#{query.academicYear}</if>
+        <if test="query.semester != null and query.semester != ''">AND o.semester=#{query.semester}</if>
+        <if test="query.offeringStatus != null and query.offeringStatus != ''">AND o.offering_status=#{query.offeringStatus}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.teaching.entity.TeachingCourseOffering" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO teaching_course_offering (course_id, teacher_id, teacher_name, academic_year, semester, capacity, selected_count, selection_start_time, selection_end_time, class_time, classroom, offering_status, remark)
+        VALUES (#{courseId}, #{teacherId}, #{teacherName}, #{academicYear}, #{semester}, #{capacity}, 0, #{selectionStartTime}, #{selectionEndTime}, #{classTime}, #{classroom}, #{offeringStatus}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.teaching.entity.TeachingCourseOffering">
+        UPDATE teaching_course_offering SET course_id=#{courseId}, teacher_id=#{teacherId}, teacher_name=#{teacherName}, academic_year=#{academicYear}, semester=#{semester}, capacity=#{capacity}, selection_start_time=#{selectionStartTime}, selection_end_time=#{selectionEndTime}, class_time=#{classTime}, classroom=#{classroom}, offering_status=#{offeringStatus}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <update id="updateStatus">UPDATE teaching_course_offering SET offering_status=#{offeringStatus}, update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <update id="updateSelectedCount">UPDATE teaching_course_offering SET selected_count=GREATEST(0, selected_count + #{delta}), update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <update id="deleteById">UPDATE teaching_course_offering SET deleted=1, update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <select id="selectById" resultMap="TeachingOfferingResultMap">
+        SELECT <include refid="SelectColumns"/> FROM teaching_course_offering o
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        WHERE o.id=#{id} AND o.deleted=0
+    </select>
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1) FROM teaching_course_offering o
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        <include refid="QueryWhere"/>
+    </select>
+    <select id="selectPage" resultMap="TeachingOfferingResultMap">
+        SELECT <include refid="SelectColumns"/> FROM teaching_course_offering o
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        <include refid="QueryWhere"/>
+        ORDER BY o.create_time DESC, o.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectMy" resultMap="TeachingOfferingResultMap">
+        SELECT <include refid="SelectColumns"/> FROM teaching_course_offering o
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        WHERE o.teacher_id=#{teacherId} AND o.deleted=0 ORDER BY o.create_time DESC, o.id DESC
+    </select>
+    <select id="selectAvailable" resultMap="TeachingOfferingResultMap">
+        SELECT <include refid="SelectColumns"/> FROM teaching_course_offering o
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        WHERE o.deleted=0 AND c.status=1 AND o.offering_status='OPEN'
+          AND (o.selection_start_time IS NULL OR o.selection_start_time &lt;= NOW())
+          AND (o.selection_end_time IS NULL OR o.selection_end_time &gt;= NOW())
+        <if test="keyword != null and keyword != ''">
+            AND (c.course_code LIKE CONCAT('%', #{keyword}, '%') OR c.course_name LIKE CONCAT('%', #{keyword}, '%') OR o.teacher_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="courseType != null and courseType != ''">AND c.course_type=#{courseType}</if>
+        <if test="academicYear != null and academicYear != ''">AND o.academic_year=#{academicYear}</if>
+        <if test="semester != null and semester != ''">AND o.semester=#{semester}</if>
+        ORDER BY o.academic_year DESC, o.semester DESC, c.course_code ASC
+    </select>
+    <select id="countUsed" resultType="int">SELECT COUNT(1) FROM teaching_course_enrollment WHERE offering_id=#{id} AND deleted=0 AND enrollment_status='SELECTED'</select>
+</mapper>

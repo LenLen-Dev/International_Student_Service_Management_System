@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.academic.mapper.AcademicClassMapper">
+    <resultMap id="AcademicClassResultMap" type="com.wenjie.modules.academic.entity.AcademicClass">
+        <id property="id" column="id"/>
+        <result property="majorId" column="major_id"/>
+        <result property="gradeId" column="grade_id"/>
+        <result property="classCode" column="class_code"/>
+        <result property="className" column="class_name"/>
+        <result property="advisorId" column="advisor_id"/>
+        <result property="advisorName" column="advisor_name"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="college" column="college"/>
+        <result property="majorName" column="major_name"/>
+        <result property="gradeName" column="grade_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        c.id, c.major_id, c.grade_id, c.class_code, c.class_name, c.advisor_id, c.advisor_name, c.status, c.remark, c.deleted, c.create_time, c.update_time,
+        m.college, m.major_name, g.grade_name
+    </sql>
+    <sql id="QueryWhere">
+        WHERE c.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (c.class_code LIKE CONCAT('%', #{query.keyword}, '%') OR c.class_name LIKE CONCAT('%', #{query.keyword}, '%') OR m.major_name LIKE CONCAT('%', #{query.keyword}, '%') OR g.grade_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.majorId != null">AND c.major_id = #{query.majorId}</if>
+        <if test="query.gradeId != null">AND c.grade_id = #{query.gradeId}</if>
+        <if test="query.status != null">AND c.status = #{query.status}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.academic.entity.AcademicClass" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO academic_class (major_id, grade_id, class_code, class_name, advisor_id, advisor_name, status, remark)
+        VALUES (#{majorId}, #{gradeId}, #{classCode}, #{className}, #{advisorId}, #{advisorName}, #{status}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.academic.entity.AcademicClass">
+        UPDATE academic_class SET major_id=#{majorId}, grade_id=#{gradeId}, class_code=#{classCode}, class_name=#{className}, advisor_id=#{advisorId}, advisor_name=#{advisorName}, status=#{status}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <update id="deleteById">UPDATE academic_class SET deleted=1, update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <select id="selectById" resultMap="AcademicClassResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_class c
+        LEFT JOIN academic_major m ON m.id=c.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=c.grade_id AND g.deleted=0
+        WHERE c.id=#{id} AND c.deleted=0
+    </select>
+    <select id="selectByCode" resultMap="AcademicClassResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_class c
+        LEFT JOIN academic_major m ON m.id=c.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=c.grade_id AND g.deleted=0
+        WHERE c.class_code=#{classCode} AND c.deleted=0 LIMIT 1
+    </select>
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1) FROM academic_class c
+        LEFT JOIN academic_major m ON m.id=c.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=c.grade_id AND g.deleted=0
+        <include refid="QueryWhere"/>
+    </select>
+    <select id="selectPage" resultMap="AcademicClassResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_class c
+        LEFT JOIN academic_major m ON m.id=c.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=c.grade_id AND g.deleted=0
+        <include refid="QueryWhere"/>
+        ORDER BY c.create_time DESC, c.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectAllEnabled" resultMap="AcademicClassResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_class c
+        LEFT JOIN academic_major m ON m.id=c.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=c.grade_id AND g.deleted=0
+        WHERE c.deleted=0 AND c.status=1 ORDER BY g.enrollment_year DESC, m.major_name ASC, c.class_name ASC
+    </select>
+    <select id="countUsed" resultType="int">SELECT COUNT(1) FROM academic_student_record WHERE class_id=#{id} AND deleted=0</select>
+</mapper>

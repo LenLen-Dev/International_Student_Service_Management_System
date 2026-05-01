@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.teaching.mapper.TeachingAttendanceMapper">
+    <resultMap id="TeachingAttendanceResultMap" type="com.wenjie.modules.teaching.entity.TeachingAttendance">
+        <id property="id" column="id"/>
+        <result property="offeringId" column="offering_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="attendanceDate" column="attendance_date"/>
+        <result property="attendanceStatus" column="attendance_status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="courseCode" column="course_code"/>
+        <result property="courseName" column="course_name"/>
+        <result property="academicYear" column="academic_year"/>
+        <result property="semester" column="semester"/>
+        <result property="teacherName" column="teacher_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        a.id, a.offering_id, a.student_id, a.attendance_date, a.attendance_status, a.remark, a.deleted, a.create_time, a.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, c.course_code, c.course_name, o.academic_year, o.semester, o.teacher_name
+    </sql>
+    <sql id="Joins">
+        FROM teaching_attendance a
+        INNER JOIN teaching_course_offering o ON o.id=a.offering_id AND o.deleted=0
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        INNER JOIN student_profile sp ON sp.id=a.student_id AND sp.deleted=0
+    </sql>
+    <sql id="QueryWhere">
+        WHERE a.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%') OR c.course_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.offeringId != null">AND a.offering_id=#{query.offeringId}</if>
+        <if test="query.teacherId != null">AND o.teacher_id=#{query.teacherId}</if>
+        <if test="query.attendanceStatus != null and query.attendanceStatus != ''">AND a.attendance_status=#{query.attendanceStatus}</if>
+        <if test="query.attendanceDate != null">AND a.attendance_date=#{query.attendanceDate}</if>
+    </sql>
+    <insert id="upsert" parameterType="com.wenjie.modules.teaching.entity.TeachingAttendance">
+        INSERT INTO teaching_attendance (offering_id, student_id, attendance_date, attendance_status, remark, deleted)
+        VALUES (#{offeringId}, #{studentId}, #{attendanceDate}, #{attendanceStatus}, #{remark}, 0)
+        ON DUPLICATE KEY UPDATE attendance_status=VALUES(attendance_status), remark=VALUES(remark), deleted=0, update_time=NOW()
+    </insert>
+    <select id="countPage" resultType="long">SELECT COUNT(1) <include refid="Joins"/> <include refid="QueryWhere"/></select>
+    <select id="selectPage" resultMap="TeachingAttendanceResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        <include refid="QueryWhere"/>
+        ORDER BY a.attendance_date DESC, a.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectByStudent" resultMap="TeachingAttendanceResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE a.student_id=#{studentId} AND a.deleted=0 ORDER BY a.attendance_date DESC, a.id DESC
+    </select>
+    <select id="countAbsenceByStudent" resultType="int">
+        SELECT COUNT(1) FROM teaching_attendance WHERE student_id=#{studentId} AND attendance_status='ABSENT' AND deleted=0
+    </select>
+    <select id="countAbsenceByStudentOffering" resultType="int">
+        SELECT COUNT(1) FROM teaching_attendance WHERE student_id=#{studentId} AND offering_id=#{offeringId} AND attendance_status='ABSENT' AND deleted=0
+    </select>
+    <select id="selectOne" resultMap="TeachingAttendanceResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE a.offering_id=#{offeringId} AND a.student_id=#{studentId} AND a.attendance_date=#{attendanceDate} AND a.deleted=0 LIMIT 1
+    </select>
+</mapper>

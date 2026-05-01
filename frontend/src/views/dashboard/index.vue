@@ -50,7 +50,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowRight, Collection, Document, Key, OfficeBuilding, Tickets, User } from '@element-plus/icons-vue'
+import { ArrowRight, Collection, Document, Key, OfficeBuilding, Reading, School, Tickets, User } from '@element-plus/icons-vue'
 import { usePermissionStore } from '@/stores/permission'
 import { useUserStore } from '@/stores/user'
 
@@ -103,6 +103,20 @@ const modules = [
     path: '/visa',
     icon: OfficeBuilding,
     color: 'green'
+  },
+  {
+    title: '学籍管理',
+    description: '专业、年级班级、请假审批和学籍异动',
+    path: '/academic',
+    icon: School,
+    color: 'orange'
+  },
+  {
+    title: '教务成绩',
+    description: '课程、选课、成绩、出勤和学业预警',
+    path: '/teaching',
+    icon: Reading,
+    color: 'cyan'
   }
 ]
 
@@ -115,6 +129,18 @@ function openModule(module: (typeof modules)[number]) {
 
   if (module.path === '/visa') {
     const target = userStore.permissions.includes('visa:record:list') ? '/visa/record' : '/visa/my'
+    router.push(target)
+    return
+  }
+
+  if (module.path === '/academic') {
+    const target = userStore.permissions.includes('academic:record:list') ? '/academic/record' : '/academic/my'
+    router.push(target)
+    return
+  }
+
+  if (module.path === '/teaching') {
+    const target = userStore.permissions.includes('teaching:course:list') ? '/teaching/course' : '/teaching/my'
     router.push(target)
     return
   }

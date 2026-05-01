@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.academic.mapper.AcademicMajorMapper">
+    <resultMap id="AcademicMajorResultMap" type="com.wenjie.modules.academic.entity.AcademicMajor">
+        <id property="id" column="id"/>
+        <result property="college" column="college"/>
+        <result property="majorCode" column="major_code"/>
+        <result property="majorName" column="major_name"/>
+        <result property="degreeLevel" column="degree_level"/>
+        <result property="studyDuration" column="study_duration"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <sql id="BaseColumns">id, college, major_code, major_name, degree_level, study_duration, status, remark, deleted, create_time, update_time</sql>
+    <sql id="QueryWhere">
+        WHERE deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (college LIKE CONCAT('%', #{query.keyword}, '%') OR major_code LIKE CONCAT('%', #{query.keyword}, '%') OR major_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.status != null">AND status = #{query.status}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.academic.entity.AcademicMajor" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO academic_major (college, major_code, major_name, degree_level, study_duration, status, remark)
+        VALUES (#{college}, #{majorCode}, #{majorName}, #{degreeLevel}, #{studyDuration}, #{status}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.academic.entity.AcademicMajor">
+        UPDATE academic_major SET college=#{college}, major_code=#{majorCode}, major_name=#{majorName}, degree_level=#{degreeLevel}, study_duration=#{studyDuration}, status=#{status}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <update id="updateStatus">UPDATE academic_major SET status=#{status}, update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <update id="deleteById">UPDATE academic_major SET deleted=1, update_time=NOW() WHERE id=#{id} AND deleted=0</update>
+    <select id="selectById" resultMap="AcademicMajorResultMap">SELECT <include refid="BaseColumns"/> FROM academic_major WHERE id=#{id} AND deleted=0</select>
+    <select id="selectByCode" resultMap="AcademicMajorResultMap">SELECT <include refid="BaseColumns"/> FROM academic_major WHERE major_code=#{majorCode} AND deleted=0 LIMIT 1</select>
+    <select id="countPage" resultType="long">SELECT COUNT(1) FROM academic_major <include refid="QueryWhere"/></select>
+    <select id="selectPage" resultMap="AcademicMajorResultMap">
+        SELECT <include refid="BaseColumns"/> FROM academic_major <include refid="QueryWhere"/> ORDER BY create_time DESC, id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectAllEnabled" resultMap="AcademicMajorResultMap">SELECT <include refid="BaseColumns"/> FROM academic_major WHERE deleted=0 AND status=1 ORDER BY college ASC, major_name ASC</select>
+    <select id="countUsed" resultType="int">SELECT COUNT(1) FROM academic_student_record WHERE major_id=#{id} AND deleted=0</select>
+</mapper>

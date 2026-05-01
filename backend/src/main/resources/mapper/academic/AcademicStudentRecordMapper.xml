@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.academic.mapper.AcademicStudentRecordMapper">
+    <resultMap id="AcademicStudentRecordResultMap" type="com.wenjie.modules.academic.entity.AcademicStudentRecord">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="majorId" column="major_id"/>
+        <result property="gradeId" column="grade_id"/>
+        <result property="classId" column="class_id"/>
+        <result property="studentStatus" column="student_status"/>
+        <result property="enrollmentDate" column="enrollment_date"/>
+        <result property="expectedGraduationDate" column="expected_graduation_date"/>
+        <result property="actualLeaveDate" column="actual_leave_date"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="college" column="college"/>
+        <result property="majorName" column="major_name"/>
+        <result property="degreeLevel" column="degree_level"/>
+        <result property="gradeName" column="grade_name"/>
+        <result property="className" column="class_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        r.id, r.student_id, r.major_id, r.grade_id, r.class_id, r.student_status, r.enrollment_date, r.expected_graduation_date, r.actual_leave_date, r.remark, r.deleted, r.create_time, r.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, m.college, m.major_name, m.degree_level, g.grade_name, c.class_name
+    </sql>
+    <sql id="QueryWhere">
+        WHERE r.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.majorId != null">AND r.major_id=#{query.majorId}</if>
+        <if test="query.gradeId != null">AND r.grade_id=#{query.gradeId}</if>
+        <if test="query.classId != null">AND r.class_id=#{query.classId}</if>
+        <if test="query.studentStatus != null and query.studentStatus != ''">AND r.student_status=#{query.studentStatus}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.academic.entity.AcademicStudentRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO academic_student_record (student_id, major_id, grade_id, class_id, student_status, enrollment_date, expected_graduation_date, actual_leave_date, remark)
+        VALUES (#{studentId}, #{majorId}, #{gradeId}, #{classId}, #{studentStatus}, #{enrollmentDate}, #{expectedGraduationDate}, #{actualLeaveDate}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.academic.entity.AcademicStudentRecord">
+        UPDATE academic_student_record SET major_id=#{majorId}, grade_id=#{gradeId}, class_id=#{classId}, student_status=#{studentStatus}, enrollment_date=#{enrollmentDate}, expected_graduation_date=#{expectedGraduationDate}, actual_leave_date=#{actualLeaveDate}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <update id="updateStatus" parameterType="com.wenjie.modules.academic.entity.AcademicStudentRecord">
+        UPDATE academic_student_record SET student_status=#{studentStatus}, actual_leave_date=#{actualLeaveDate}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <select id="selectById" resultMap="AcademicStudentRecordResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_student_record r
+        LEFT JOIN student_profile sp ON sp.id=r.student_id AND sp.deleted=0
+        LEFT JOIN academic_major m ON m.id=r.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=r.grade_id AND g.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        WHERE r.id=#{id} AND r.deleted=0
+    </select>
+    <select id="selectByStudentId" resultMap="AcademicStudentRecordResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_student_record r
+        LEFT JOIN student_profile sp ON sp.id=r.student_id AND sp.deleted=0
+        LEFT JOIN academic_major m ON m.id=r.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=r.grade_id AND g.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        WHERE r.student_id=#{studentId} AND r.deleted=0 LIMIT 1
+    </select>
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1) FROM academic_student_record r
+        LEFT JOIN student_profile sp ON sp.id=r.student_id AND sp.deleted=0
+        LEFT JOIN academic_major m ON m.id=r.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=r.grade_id AND g.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        <include refid="QueryWhere"/>
+    </select>
+    <select id="selectPage" resultMap="AcademicStudentRecordResultMap">
+        SELECT <include refid="SelectColumns"/> FROM academic_student_record r
+        LEFT JOIN student_profile sp ON sp.id=r.student_id AND sp.deleted=0
+        LEFT JOIN academic_major m ON m.id=r.major_id AND m.deleted=0
+        LEFT JOIN academic_grade g ON g.id=r.grade_id AND g.deleted=0
+        LEFT JOIN academic_class c ON c.id=r.class_id AND c.deleted=0
+        <include refid="QueryWhere"/>
+        ORDER BY r.create_time DESC, r.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+</mapper>

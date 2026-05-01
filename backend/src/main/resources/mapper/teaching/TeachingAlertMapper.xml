@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.teaching.mapper.TeachingAlertMapper">
+    <resultMap id="TeachingAlertResultMap" type="com.wenjie.modules.teaching.entity.TeachingAcademicAlert">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="alertType" column="alert_type"/>
+        <result property="alertLevel" column="alert_level"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="alertStatus" column="alert_status"/>
+        <result property="handlerId" column="handler_id"/>
+        <result property="handlerName" column="handler_name"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="handleRemark" column="handle_remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        a.id, a.student_id, a.alert_type, a.alert_level, a.source_id, a.title, a.content, a.alert_status, a.handler_id, a.handler_name, a.handle_time, a.handle_remark, a.deleted, a.create_time, a.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name
+    </sql>
+    <sql id="Joins">
+        FROM teaching_academic_alert a
+        INNER JOIN student_profile sp ON sp.id=a.student_id AND sp.deleted=0
+    </sql>
+    <sql id="QueryWhere">
+        WHERE a.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%') OR a.title LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.alertType != null and query.alertType != ''">AND a.alert_type=#{query.alertType}</if>
+        <if test="query.alertLevel != null and query.alertLevel != ''">AND a.alert_level=#{query.alertLevel}</if>
+        <if test="query.alertStatus != null and query.alertStatus != ''">AND a.alert_status=#{query.alertStatus}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.teaching.entity.TeachingAcademicAlert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO teaching_academic_alert (student_id, alert_type, alert_level, source_id, title, content, alert_status)
+        VALUES (#{studentId}, #{alertType}, #{alertLevel}, #{sourceId}, #{title}, #{content}, #{alertStatus})
+    </insert>
+    <update id="updateHandle" parameterType="com.wenjie.modules.teaching.entity.TeachingAcademicAlert">
+        UPDATE teaching_academic_alert SET alert_status=#{alertStatus}, handler_id=#{handlerId}, handler_name=#{handlerName}, handle_time=#{handleTime}, handle_remark=#{handleRemark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <select id="selectById" resultMap="TeachingAlertResultMap">SELECT <include refid="SelectColumns"/> <include refid="Joins"/> WHERE a.id=#{id} AND a.deleted=0</select>
+    <select id="selectExisting" resultMap="TeachingAlertResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE a.student_id=#{studentId} AND a.alert_type=#{alertType}
+        <if test="sourceId != null">AND a.source_id=#{sourceId}</if>
+        <if test="sourceId == null">AND a.source_id IS NULL</if>
+        AND a.alert_status='PENDING' AND a.deleted=0 LIMIT 1
+    </select>
+    <select id="countPage" resultType="long">SELECT COUNT(1) <include refid="Joins"/> <include refid="QueryWhere"/></select>
+    <select id="selectPage" resultMap="TeachingAlertResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        <include refid="QueryWhere"/>
+        ORDER BY a.create_time DESC, a.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectByStudent" resultMap="TeachingAlertResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE a.student_id=#{studentId} AND a.deleted=0 ORDER BY a.create_time DESC, a.id DESC
+    </select>
+</mapper>

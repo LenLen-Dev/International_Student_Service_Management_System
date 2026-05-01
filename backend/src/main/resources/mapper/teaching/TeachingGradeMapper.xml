@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.teaching.mapper.TeachingGradeMapper">
+    <resultMap id="TeachingGradeResultMap" type="com.wenjie.modules.teaching.entity.TeachingGrade">
+        <id property="id" column="id"/>
+        <result property="enrollmentId" column="enrollment_id"/>
+        <result property="offeringId" column="offering_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="usualScore" column="usual_score"/>
+        <result property="finalScore" column="final_score"/>
+        <result property="totalScore" column="total_score"/>
+        <result property="gradePoint" column="grade_point"/>
+        <result property="passed" column="passed"/>
+        <result property="gradeStatus" column="grade_status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="courseCode" column="course_code"/>
+        <result property="courseName" column="course_name"/>
+        <result property="academicYear" column="academic_year"/>
+        <result property="semester" column="semester"/>
+        <result property="teacherName" column="teacher_name"/>
+    </resultMap>
+    <sql id="SelectColumns">
+        g.id, g.enrollment_id, g.offering_id, g.student_id, g.usual_score, g.final_score, g.total_score, g.grade_point, g.passed, g.grade_status, g.remark, g.deleted, g.create_time, g.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, c.course_code, c.course_name, o.academic_year, o.semester, o.teacher_name
+    </sql>
+    <sql id="Joins">
+        FROM teaching_grade g
+        INNER JOIN teaching_course_offering o ON o.id=g.offering_id AND o.deleted=0
+        INNER JOIN teaching_course c ON c.id=o.course_id AND c.deleted=0
+        INNER JOIN student_profile sp ON sp.id=g.student_id AND sp.deleted=0
+    </sql>
+    <sql id="QueryWhere">
+        WHERE g.deleted=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.keyword}, '%') OR sp.chinese_name LIKE CONCAT('%', #{query.keyword}, '%') OR sp.english_name LIKE CONCAT('%', #{query.keyword}, '%') OR c.course_name LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.offeringId != null">AND g.offering_id=#{query.offeringId}</if>
+        <if test="query.teacherId != null">AND o.teacher_id=#{query.teacherId}</if>
+        <if test="query.gradeStatus != null and query.gradeStatus != ''">AND g.grade_status=#{query.gradeStatus}</if>
+    </sql>
+    <insert id="insert" parameterType="com.wenjie.modules.teaching.entity.TeachingGrade" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO teaching_grade (enrollment_id, offering_id, student_id, usual_score, final_score, total_score, grade_point, passed, grade_status, remark)
+        VALUES (#{enrollmentId}, #{offeringId}, #{studentId}, #{usualScore}, #{finalScore}, #{totalScore}, #{gradePoint}, #{passed}, #{gradeStatus}, #{remark})
+    </insert>
+    <update id="updateById" parameterType="com.wenjie.modules.teaching.entity.TeachingGrade">
+        UPDATE teaching_grade SET usual_score=#{usualScore}, final_score=#{finalScore}, total_score=#{totalScore}, grade_point=#{gradePoint}, passed=#{passed}, remark=#{remark}, update_time=NOW()
+        WHERE id=#{id} AND deleted=0 AND grade_status='DRAFT'
+    </update>
+    <update id="publishByOffering">UPDATE teaching_grade SET grade_status='PUBLISHED', update_time=NOW() WHERE offering_id=#{offeringId} AND deleted=0</update>
+    <update id="deleteDraftByEnrollment">UPDATE teaching_grade SET deleted=1, update_time=NOW() WHERE enrollment_id=#{enrollmentId} AND grade_status='DRAFT' AND deleted=0</update>
+    <select id="selectById" resultMap="TeachingGradeResultMap">SELECT <include refid="SelectColumns"/> <include refid="Joins"/> WHERE g.id=#{id} AND g.deleted=0</select>
+    <select id="selectByEnrollmentId" resultMap="TeachingGradeResultMap">SELECT <include refid="SelectColumns"/> <include refid="Joins"/> WHERE g.enrollment_id=#{enrollmentId} AND g.deleted=0 LIMIT 1</select>
+    <select id="countPage" resultType="long">SELECT COUNT(1) <include refid="Joins"/> <include refid="QueryWhere"/></select>
+    <select id="selectPage" resultMap="TeachingGradeResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        <include refid="QueryWhere"/>
+        ORDER BY g.create_time DESC, g.id DESC LIMIT #{query.offset}, #{query.limit}
+    </select>
+    <select id="selectByStudent" resultMap="TeachingGradeResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE g.student_id=#{studentId} AND g.deleted=0
+        <if test="publishedOnly">AND g.grade_status='PUBLISHED'</if>
+        ORDER BY o.academic_year DESC, o.semester DESC, g.id DESC
+    </select>
+    <select id="countPublishedByEnrollment" resultType="int">SELECT COUNT(1) FROM teaching_grade WHERE enrollment_id=#{enrollmentId} AND grade_status='PUBLISHED' AND deleted=0</select>
+    <select id="selectFailedOrLowScores" resultMap="TeachingGradeResultMap">
+        SELECT <include refid="SelectColumns"/> <include refid="Joins"/>
+        WHERE g.deleted=0 AND g.grade_status='PUBLISHED' AND (g.passed=0 OR g.total_score &lt; 60)
+    </select>
+</mapper>
