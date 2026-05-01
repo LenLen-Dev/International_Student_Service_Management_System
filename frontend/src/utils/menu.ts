@@ -11,7 +11,12 @@ const pathMap: Record<string, string> = {
   '/system/menus': '/system/menu',
   '/student/profile': '/student/profiles',
   '/admission/applications/me': '/admission/my-application',
-  '/admission/applications': '/admission/review'
+  '/admission/applications': '/admission/review',
+  '/visa/records': '/visa/record',
+  '/visa/residence-permits': '/visa/permit',
+  '/visa/renewals': '/visa/renewal',
+  '/visa/alerts': '/visa/alert',
+  '/visa/me': '/visa/my'
 }
 
 const componentMap: Record<string, string> = {
@@ -22,7 +27,16 @@ const componentMap: Record<string, string> = {
   'admission/applications/me/index': 'admission/my-application/index',
   'admission/my-application/index': 'admission/my-application/index',
   'admission/applications/index': 'admission/review/index',
-  'admission/review/index': 'admission/review/index'
+  'admission/review/index': 'admission/review/index',
+  'visa/records/index': 'visa/record/index',
+  'visa/record/index': 'visa/record/index',
+  'visa/residence-permits/index': 'visa/permit/index',
+  'visa/permit/index': 'visa/permit/index',
+  'visa/renewals/index': 'visa/renewal/index',
+  'visa/renewal/index': 'visa/renewal/index',
+  'visa/alerts/index': 'visa/alert/index',
+  'visa/alert/index': 'visa/alert/index',
+  'visa/my/index': 'visa/my/index'
 }
 
 export const iconMap: Record<string, string> = {
@@ -45,6 +59,13 @@ export const iconMap: Record<string, string> = {
   review: 'Checked',
   tickets: 'Tickets',
   checked: 'Checked',
+  visa: 'OfficeBuilding',
+  officebuilding: 'OfficeBuilding',
+  permit: 'Folder',
+  renewal: 'Edit',
+  edit: 'Edit',
+  warning: 'Warning',
+  alert: 'Warning',
   document: 'Document',
   school: 'School',
   office: 'OfficeBuilding'

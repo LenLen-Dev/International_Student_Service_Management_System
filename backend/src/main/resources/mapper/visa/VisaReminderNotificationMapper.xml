@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.visa.mapper.VisaReminderNotificationMapper">
+    <resultMap id="VisaReminderNotificationResultMap" type="com.wenjie.modules.visa.entity.VisaReminderNotification">
+        <id property="id" column="id"/>
+        <result property="alertId" column="alert_id"/>
+        <result property="recipientUserId" column="recipient_user_id"/>
+        <result property="recipientName" column="recipient_name"/>
+        <result property="channel" column="channel"/>
+        <result property="sendStatus" column="send_status"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="readStatus" column="read_status"/>
+        <result property="readTime" column="read_time"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Columns">
+        id, alert_id, recipient_user_id, recipient_name, channel, send_status, title, content, error_message,
+        read_status, read_time, send_time, deleted, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.visa.entity.VisaReminderNotification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO visa_reminder_notification (alert_id, recipient_user_id, recipient_name, channel, send_status, title, content, error_message, read_status, send_time)
+        VALUES (#{alertId}, #{recipientUserId}, #{recipientName}, #{channel}, #{sendStatus}, #{title}, #{content}, #{errorMessage}, #{readStatus}, #{sendTime})
+    </insert>
+
+    <update id="updateSendResult" parameterType="com.wenjie.modules.visa.entity.VisaReminderNotification">
+        UPDATE visa_reminder_notification
+        SET send_status = #{sendStatus}, error_message = #{errorMessage}, send_time = #{sendTime}, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="markRead">
+        UPDATE visa_reminder_notification
+        SET read_status = 1, read_time = NOW(), update_time = NOW()
+        WHERE id = #{id} AND recipient_user_id = #{recipientUserId} AND deleted = 0
+    </update>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM visa_reminder_notification
+        WHERE deleted = 0
+        <if test="query.channel != null and query.channel != ''">AND channel = #{query.channel}</if>
+        <if test="query.sendStatus != null and query.sendStatus != ''">AND send_status = #{query.sendStatus}</if>
+        <if test="query.readStatus != null">AND read_status = #{query.readStatus}</if>
+    </select>
+
+    <select id="selectPage" resultMap="VisaReminderNotificationResultMap">
+        SELECT <include refid="Base_Columns"/>
+        FROM visa_reminder_notification
+        WHERE deleted = 0
+        <if test="query.channel != null and query.channel != ''">AND channel = #{query.channel}</if>
+        <if test="query.sendStatus != null and query.sendStatus != ''">AND send_status = #{query.sendStatus}</if>
+        <if test="query.readStatus != null">AND read_status = #{query.readStatus}</if>
+        ORDER BY create_time DESC, id DESC
+        LIMIT #{query.offset}, #{query.limit}
+    </select>
+
+    <select id="selectByUserId" resultMap="VisaReminderNotificationResultMap">
+        SELECT <include refid="Base_Columns"/>
+        FROM visa_reminder_notification
+        WHERE recipient_user_id = #{recipientUserId} AND deleted = 0
+        ORDER BY read_status ASC, create_time DESC, id DESC
+    </select>
+
+    <select id="selectByAlertId" resultMap="VisaReminderNotificationResultMap">
+        SELECT <include refid="Base_Columns"/>
+        FROM visa_reminder_notification
+        WHERE alert_id = #{alertId} AND deleted = 0
+        ORDER BY create_time DESC, id DESC
+    </select>
+</mapper>

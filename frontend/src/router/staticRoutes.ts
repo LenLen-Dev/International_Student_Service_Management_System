@@ -56,6 +56,44 @@ export const staticRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/visa',
+    component: Layout,
+    redirect: '/visa/record',
+    meta: { title: '签证与居留管理', icon: 'OfficeBuilding' },
+    children: [
+      {
+        path: 'record',
+        name: 'VisaRecord',
+        component: () => import('@/views/visa/record/index.vue'),
+        meta: { title: '签证信息', icon: 'Document', permission: 'visa:record:list' }
+      },
+      {
+        path: 'permit',
+        name: 'VisaPermit',
+        component: () => import('@/views/visa/permit/index.vue'),
+        meta: { title: '居留许可', icon: 'Folder', permission: 'visa:permit:list' }
+      },
+      {
+        path: 'renewal',
+        name: 'VisaRenewal',
+        component: () => import('@/views/visa/renewal/index.vue'),
+        meta: { title: '续签记录', icon: 'Edit', permission: 'visa:renewal:list' }
+      },
+      {
+        path: 'alert',
+        name: 'VisaAlert',
+        component: () => import('@/views/visa/alert/index.vue'),
+        meta: { title: '合规预警', icon: 'Warning', permission: 'visa:alert:list' }
+      },
+      {
+        path: 'my',
+        name: 'VisaMy',
+        component: () => import('@/views/visa/my/index.vue'),
+        meta: { title: '我的签证居留', icon: 'User', permission: 'visa:my:view' }
+      }
+    ]
+  },
+  {
     path: '/config',
     component: Layout,
     redirect: '/config/dict',

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.visa.mapper.VisaRenewalRecordMapper">
+    <resultMap id="VisaRenewalRecordResultMap" type="com.wenjie.modules.visa.entity.VisaRenewalRecord">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="renewalType" column="renewal_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="applicationDate" column="application_date"/>
+        <result property="acceptanceDate" column="acceptance_date"/>
+        <result property="completeDate" column="complete_date"/>
+        <result property="renewalStatus" column="renewal_status"/>
+        <result property="result" column="result"/>
+        <result property="newValidUntil" column="new_valid_until"/>
+        <result property="handlerId" column="handler_id"/>
+        <result property="handlerName" column="handler_name"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+    </resultMap>
+
+    <sql id="Select_Columns">
+        rr.id, rr.student_id, rr.renewal_type, rr.target_id, rr.application_date, rr.acceptance_date, rr.complete_date,
+        rr.renewal_status, rr.result, rr.new_valid_until, rr.handler_id, rr.handler_name, rr.remark, rr.deleted,
+        rr.create_time, rr.update_time, sp.student_no, sp.chinese_name, sp.english_name
+    </sql>
+
+    <sql id="Query_Where">
+        WHERE rr.deleted = 0
+        <if test="query.studentKeyword != null and query.studentKeyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.chinese_name LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.english_name LIKE CONCAT('%', #{query.studentKeyword}, '%'))
+        </if>
+        <if test="query.renewalType != null and query.renewalType != ''">
+            AND rr.renewal_type = #{query.renewalType}
+        </if>
+        <if test="query.renewalStatus != null and query.renewalStatus != ''">
+            AND rr.renewal_status = #{query.renewalStatus}
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND rr.application_date &gt;= #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND rr.application_date &lt;= #{query.endDate}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.visa.entity.VisaRenewalRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO visa_renewal_record (student_id, renewal_type, target_id, application_date, acceptance_date, complete_date,
+                                         renewal_status, result, new_valid_until, handler_id, handler_name, remark)
+        VALUES (#{studentId}, #{renewalType}, #{targetId}, #{applicationDate}, #{acceptanceDate}, #{completeDate},
+                #{renewalStatus}, #{result}, #{newValidUntil}, #{handlerId}, #{handlerName}, #{remark})
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.visa.entity.VisaRenewalRecord">
+        UPDATE visa_renewal_record
+        SET student_id = #{studentId}, renewal_type = #{renewalType}, target_id = #{targetId},
+            application_date = #{applicationDate}, acceptance_date = #{acceptanceDate}, complete_date = #{completeDate},
+            renewal_status = #{renewalStatus}, result = #{result}, new_valid_until = #{newValidUntil},
+            handler_id = #{handlerId}, handler_name = #{handlerName}, remark = #{remark}, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE visa_renewal_record SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="VisaRenewalRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_renewal_record rr
+        LEFT JOIN student_profile sp ON sp.id = rr.student_id AND sp.deleted = 0
+        WHERE rr.id = #{id} AND rr.deleted = 0
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM visa_renewal_record rr
+        LEFT JOIN student_profile sp ON sp.id = rr.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+    </select>
+
+    <select id="selectPage" resultMap="VisaRenewalRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_renewal_record rr
+        LEFT JOIN student_profile sp ON sp.id = rr.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+        ORDER BY rr.create_time DESC, rr.id DESC
+        LIMIT #{query.offset}, #{query.limit}
+    </select>
+
+    <select id="selectByStudentId" resultMap="VisaRenewalRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_renewal_record rr
+        LEFT JOIN student_profile sp ON sp.id = rr.student_id AND sp.deleted = 0
+        WHERE rr.student_id = #{studentId} AND rr.deleted = 0
+        ORDER BY rr.create_time DESC, rr.id DESC
+    </select>
+</mapper>

@@ -36,3 +36,7 @@ sa-token:
 app:
   upload-dir: uploads
   notice-font-path: C:/Windows/Fonts/simsun.ttc
+  visa:
+    reminder-cron: "0 10 2 * * ?"
+    reminder-thresholds: "30,15,7,0"
+    email-enabled: false

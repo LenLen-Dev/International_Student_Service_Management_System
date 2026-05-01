@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.visa.mapper.ResidencePermitMapper">
+    <resultMap id="ResidencePermitResultMap" type="com.wenjie.modules.visa.entity.ResidencePermit">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="permitNo" column="permit_no"/>
+        <result property="permitType" column="permit_type"/>
+        <result property="residenceAddress" column="residence_address"/>
+        <result property="issueDate" column="issue_date"/>
+        <result property="validFrom" column="valid_from"/>
+        <result property="validUntil" column="valid_until"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+    </resultMap>
+
+    <sql id="Select_Columns">
+        rp.id, rp.student_id, rp.permit_no, rp.permit_type, rp.residence_address, rp.issue_date, rp.valid_from,
+        rp.valid_until, rp.status, rp.remark, rp.deleted, rp.create_time, rp.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name
+    </sql>
+
+    <sql id="Query_Where">
+        WHERE rp.deleted = 0
+        <if test="query.studentKeyword != null and query.studentKeyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.chinese_name LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.english_name LIKE CONCAT('%', #{query.studentKeyword}, '%'))
+        </if>
+        <if test="query.permitType != null and query.permitType != ''">
+            AND rp.permit_type = #{query.permitType}
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND rp.status = #{query.status}
+        </if>
+        <if test="query.expireStart != null and query.expireStart != ''">
+            AND rp.valid_until &gt;= #{query.expireStart}
+        </if>
+        <if test="query.expireEnd != null and query.expireEnd != ''">
+            AND rp.valid_until &lt;= #{query.expireEnd}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.visa.entity.ResidencePermit" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO residence_permit (student_id, permit_no, permit_type, residence_address, issue_date, valid_from, valid_until, status, remark)
+        VALUES (#{studentId}, #{permitNo}, #{permitType}, #{residenceAddress}, #{issueDate}, #{validFrom}, #{validUntil}, #{status}, #{remark})
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.visa.entity.ResidencePermit">
+        UPDATE residence_permit
+        SET student_id = #{studentId}, permit_no = #{permitNo}, permit_type = #{permitType}, residence_address = #{residenceAddress},
+            issue_date = #{issueDate}, valid_from = #{validFrom}, valid_until = #{validUntil}, status = #{status},
+            remark = #{remark}, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateValidUntil">
+        UPDATE residence_permit SET valid_until = #{validUntil}, status = #{status}, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE residence_permit SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="ResidencePermitResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM residence_permit rp
+        LEFT JOIN student_profile sp ON sp.id = rp.student_id AND sp.deleted = 0
+        WHERE rp.id = #{id} AND rp.deleted = 0
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM residence_permit rp
+        LEFT JOIN student_profile sp ON sp.id = rp.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+    </select>
+
+    <select id="selectPage" resultMap="ResidencePermitResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM residence_permit rp
+        LEFT JOIN student_profile sp ON sp.id = rp.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+        ORDER BY rp.valid_until ASC, rp.id DESC
+        LIMIT #{query.offset}, #{query.limit}
+    </select>
+
+    <select id="selectByStudentId" resultMap="ResidencePermitResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM residence_permit rp
+        LEFT JOIN student_profile sp ON sp.id = rp.student_id AND sp.deleted = 0
+        WHERE rp.student_id = #{studentId} AND rp.deleted = 0
+        ORDER BY rp.valid_until DESC, rp.id DESC
+    </select>
+
+    <select id="selectAlertCandidates" resultMap="ResidencePermitResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM residence_permit rp
+        LEFT JOIN student_profile sp ON sp.id = rp.student_id AND sp.deleted = 0
+        WHERE rp.deleted = 0
+          AND rp.status NOT IN ('CANCELLED')
+          AND rp.valid_until IS NOT NULL
+          AND rp.valid_until &lt;= #{deadline}
+    </select>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.visa.mapper.VisaComplianceAlertMapper">
+    <resultMap id="VisaComplianceAlertResultMap" type="com.wenjie.modules.visa.entity.VisaComplianceAlert">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="alertType" column="alert_type"/>
+        <result property="alertLevel" column="alert_level"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="expireDate" column="expire_date"/>
+        <result property="remainingDays" column="remaining_days"/>
+        <result property="alertStatus" column="alert_status"/>
+        <result property="handlerId" column="handler_id"/>
+        <result property="handlerName" column="handler_name"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="handleRemark" column="handle_remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="userId" column="user_id"/>
+        <result property="email" column="email"/>
+    </resultMap>
+
+    <sql id="Select_Columns">
+        va.id, va.student_id, va.alert_type, va.alert_level, va.target_type, va.target_id, va.title, va.content,
+        va.expire_date, va.remaining_days, va.alert_status, va.handler_id, va.handler_name, va.handle_time,
+        va.handle_remark, va.deleted, va.create_time, va.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name, sp.user_id, sp.email
+    </sql>
+
+    <sql id="Query_Where">
+        WHERE va.deleted = 0
+        <if test="query.studentKeyword != null and query.studentKeyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.chinese_name LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.english_name LIKE CONCAT('%', #{query.studentKeyword}, '%'))
+        </if>
+        <if test="query.alertType != null and query.alertType != ''">
+            AND va.alert_type = #{query.alertType}
+        </if>
+        <if test="query.alertLevel != null and query.alertLevel != ''">
+            AND va.alert_level = #{query.alertLevel}
+        </if>
+        <if test="query.alertStatus != null and query.alertStatus != ''">
+            AND va.alert_status = #{query.alertStatus}
+        </if>
+        <if test="query.targetType != null and query.targetType != ''">
+            AND va.target_type = #{query.targetType}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.visa.entity.VisaComplianceAlert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO visa_compliance_alert (student_id, alert_type, alert_level, target_type, target_id, title, content,
+                                           expire_date, remaining_days, alert_status)
+        VALUES (#{studentId}, #{alertType}, #{alertLevel}, #{targetType}, #{targetId}, #{title}, #{content},
+                #{expireDate}, #{remainingDays}, #{alertStatus})
+    </insert>
+
+    <update id="resolve" parameterType="com.wenjie.modules.visa.entity.VisaComplianceAlert">
+        UPDATE visa_compliance_alert
+        SET alert_status = #{alertStatus}, handler_id = #{handlerId}, handler_name = #{handlerName},
+            handle_time = NOW(), handle_remark = #{handleRemark}, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="VisaComplianceAlertResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_compliance_alert va
+        LEFT JOIN student_profile sp ON sp.id = va.student_id AND sp.deleted = 0
+        WHERE va.id = #{id} AND va.deleted = 0
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM visa_compliance_alert va
+        LEFT JOIN student_profile sp ON sp.id = va.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+    </select>
+
+    <select id="selectPage" resultMap="VisaComplianceAlertResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_compliance_alert va
+        LEFT JOIN student_profile sp ON sp.id = va.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+        ORDER BY FIELD(va.alert_status, 'OPEN', 'PROCESSING', 'RESOLVED', 'CLOSED'), va.remaining_days ASC, va.create_time DESC
+        LIMIT #{query.offset}, #{query.limit}
+    </select>
+
+    <select id="selectByStudentId" resultMap="VisaComplianceAlertResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_compliance_alert va
+        LEFT JOIN student_profile sp ON sp.id = va.student_id AND sp.deleted = 0
+        WHERE va.student_id = #{studentId} AND va.deleted = 0
+        ORDER BY va.create_time DESC, va.id DESC
+    </select>
+
+    <select id="countOpenTargetAlert" resultType="int">
+        SELECT COUNT(1)
+        FROM visa_compliance_alert
+        WHERE deleted = 0
+          AND target_type = #{targetType}
+          AND target_id = #{targetId}
+          AND alert_type = #{alertType}
+          AND alert_status IN ('OPEN', 'PROCESSING')
+    </select>
+
+    <select id="selectStudentsForCompliance" resultType="com.wenjie.modules.student.entity.StudentProfile">
+        SELECT *
+        FROM student_profile
+        WHERE deleted = 0 AND status = 1 AND student_status IN ('PRE_ADMITTED', 'ENROLLED', 'SUSPENDED')
+    </select>
+</mapper>

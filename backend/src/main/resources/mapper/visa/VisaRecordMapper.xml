@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.visa.mapper.VisaRecordMapper">
+    <resultMap id="VisaRecordResultMap" type="com.wenjie.modules.visa.entity.VisaRecord">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="passportNo" column="passport_no"/>
+        <result property="visaType" column="visa_type"/>
+        <result property="visaNo" column="visa_no"/>
+        <result property="issuePlace" column="issue_place"/>
+        <result property="issueDate" column="issue_date"/>
+        <result property="validFrom" column="valid_from"/>
+        <result property="validUntil" column="valid_until"/>
+        <result property="entryCount" column="entry_count"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+    </resultMap>
+
+    <sql id="Select_Columns">
+        vr.id, vr.student_id, vr.passport_no, vr.visa_type, vr.visa_no, vr.issue_place, vr.issue_date,
+        vr.valid_from, vr.valid_until, vr.entry_count, vr.status, vr.remark, vr.deleted, vr.create_time, vr.update_time,
+        sp.student_no, sp.chinese_name, sp.english_name
+    </sql>
+
+    <sql id="Query_Where">
+        WHERE vr.deleted = 0
+        <if test="query.studentKeyword != null and query.studentKeyword != ''">
+            AND (sp.student_no LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.chinese_name LIKE CONCAT('%', #{query.studentKeyword}, '%')
+              OR sp.english_name LIKE CONCAT('%', #{query.studentKeyword}, '%'))
+        </if>
+        <if test="query.visaType != null and query.visaType != ''">
+            AND vr.visa_type = #{query.visaType}
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND vr.status = #{query.status}
+        </if>
+        <if test="query.expireStart != null and query.expireStart != ''">
+            AND vr.valid_until &gt;= #{query.expireStart}
+        </if>
+        <if test="query.expireEnd != null and query.expireEnd != ''">
+            AND vr.valid_until &lt;= #{query.expireEnd}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.visa.entity.VisaRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO visa_record (student_id, passport_no, visa_type, visa_no, issue_place, issue_date, valid_from, valid_until, entry_count, status, remark)
+        VALUES (#{studentId}, #{passportNo}, #{visaType}, #{visaNo}, #{issuePlace}, #{issueDate}, #{validFrom}, #{validUntil}, #{entryCount}, #{status}, #{remark})
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.visa.entity.VisaRecord">
+        UPDATE visa_record
+        SET student_id = #{studentId}, passport_no = #{passportNo}, visa_type = #{visaType}, visa_no = #{visaNo},
+            issue_place = #{issuePlace}, issue_date = #{issueDate}, valid_from = #{validFrom}, valid_until = #{validUntil},
+            entry_count = #{entryCount}, status = #{status}, remark = #{remark}, update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateValidUntil">
+        UPDATE visa_record SET valid_until = #{validUntil}, status = #{status}, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE visa_record SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="VisaRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_record vr
+        LEFT JOIN student_profile sp ON sp.id = vr.student_id AND sp.deleted = 0
+        WHERE vr.id = #{id} AND vr.deleted = 0
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM visa_record vr
+        LEFT JOIN student_profile sp ON sp.id = vr.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+    </select>
+
+    <select id="selectPage" resultMap="VisaRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_record vr
+        LEFT JOIN student_profile sp ON sp.id = vr.student_id AND sp.deleted = 0
+        <include refid="Query_Where"/>
+        ORDER BY vr.valid_until ASC, vr.id DESC
+        LIMIT #{query.offset}, #{query.limit}
+    </select>
+
+    <select id="selectByStudentId" resultMap="VisaRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_record vr
+        LEFT JOIN student_profile sp ON sp.id = vr.student_id AND sp.deleted = 0
+        WHERE vr.student_id = #{studentId} AND vr.deleted = 0
+        ORDER BY vr.valid_until DESC, vr.id DESC
+    </select>
+
+    <select id="selectAlertCandidates" resultMap="VisaRecordResultMap">
+        SELECT <include refid="Select_Columns"/>
+        FROM visa_record vr
+        LEFT JOIN student_profile sp ON sp.id = vr.student_id AND sp.deleted = 0
+        WHERE vr.deleted = 0
+          AND vr.status NOT IN ('CANCELLED')
+          AND vr.valid_until IS NOT NULL
+          AND vr.valid_until &lt;= #{deadline}
+    </select>
+</mapper>

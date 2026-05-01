@@ -100,6 +100,7 @@ const modules = [
   {
     title: '签证管理',
     description: '签证、居留许可和到期提醒业务入口',
+    path: '/visa',
     icon: OfficeBuilding,
     color: 'green'
   }
@@ -108,6 +109,12 @@ const modules = [
 function openModule(module: (typeof modules)[number]) {
   if (module.path === '/admission') {
     const target = userStore.permissions.includes('admission:application:list') ? '/admission/review' : '/admission/my-application'
+    router.push(target)
+    return
+  }
+
+  if (module.path === '/visa') {
+    const target = userStore.permissions.includes('visa:record:list') ? '/visa/record' : '/visa/my'
     router.push(target)
     return
   }
