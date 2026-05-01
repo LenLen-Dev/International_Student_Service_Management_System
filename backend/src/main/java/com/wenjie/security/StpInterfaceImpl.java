@@ -14,7 +14,7 @@
 package com.wenjie.security;
 
 import cn.dev33.satoken.stp.StpInterface;
-import com.wenjie.mapper.SysUserMapper;
+import com.wenjie.modules.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

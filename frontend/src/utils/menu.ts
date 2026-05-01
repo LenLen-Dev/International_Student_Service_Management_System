@@ -8,13 +8,15 @@ const viewModules = import.meta.glob('../views/**/*.vue')
 const pathMap: Record<string, string> = {
   '/system/users': '/system/user',
   '/system/roles': '/system/role',
-  '/system/menus': '/system/menu'
+  '/system/menus': '/system/menu',
+  '/student/profile': '/student/profiles'
 }
 
 const componentMap: Record<string, string> = {
   'system/users/index': 'system/user/index',
   'system/roles/index': 'system/role/index',
-  'system/menus/index': 'system/menu/index'
+  'system/menus/index': 'system/menu/index',
+  'student/profiles/index': 'student/profile/index'
 }
 
 export const iconMap: Record<string, string> = {

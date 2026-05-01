@@ -18,7 +18,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.wenjie.mapper")
+@MapperScan("com.wenjie.modules.*.mapper")
 public class InternationalStudentServiceManagementSystemApplication {
 
     public static void main(String[] args) {

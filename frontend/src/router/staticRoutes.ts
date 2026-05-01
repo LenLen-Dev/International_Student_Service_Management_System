@@ -22,6 +22,20 @@ export const staticRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/student',
+    component: Layout,
+    redirect: '/student/profiles',
+    meta: { title: '留学生管理', icon: 'School' },
+    children: [
+      {
+        path: 'profiles',
+        name: 'StudentProfiles',
+        component: () => import('@/views/student/profile/index.vue'),
+        meta: { title: '留学生档案', icon: 'Collection', permission: 'student:profile:list' }
+      }
+    ]
+  },
+  {
     path: '/404',
     name: 'NotFound',
     component: () => import('@/views/dashboard/index.vue'),

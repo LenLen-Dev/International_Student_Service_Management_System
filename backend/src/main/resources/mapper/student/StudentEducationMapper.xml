@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.student.mapper.StudentEducationMapper">
+    <resultMap id="StudentEducationResultMap" type="com.wenjie.modules.student.entity.StudentEducation">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="schoolName" column="school_name"/>
+        <result property="country" column="country"/>
+        <result property="degreeLevel" column="degree_level"/>
+        <result property="major" column="major"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="certificateUrl" column="certificate_url"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, student_id, school_name, country, degree_level, major, start_date, end_date, certificate_url, remark, deleted, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.student.entity.StudentEducation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_education (student_id, school_name, country, degree_level, major, start_date, end_date, certificate_url, remark)
+        VALUES (#{studentId}, #{schoolName}, #{country}, #{degreeLevel}, #{major}, #{startDate}, #{endDate}, #{certificateUrl}, #{remark})
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.student.entity.StudentEducation">
+        UPDATE student_education
+        <set>
+            <if test="schoolName != null and schoolName != ''">school_name = #{schoolName},</if>
+            country = #{country},
+            degree_level = #{degreeLevel},
+            major = #{major},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            certificate_url = #{certificateUrl},
+            remark = #{remark},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE student_education SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectByStudentId" resultMap="StudentEducationResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_education WHERE student_id = #{studentId} AND deleted = 0 ORDER BY start_date DESC, id DESC
+    </select>
+
+    <select id="selectById" resultMap="StudentEducationResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_education WHERE id = #{id} AND deleted = 0
+    </select>
+</mapper>

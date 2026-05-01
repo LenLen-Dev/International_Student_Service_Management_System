@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.student.mapper.StudentProfileMapper">
+    <resultMap id="StudentProfileResultMap" type="com.wenjie.modules.student.entity.StudentProfile">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="studentNo" column="student_no"/>
+        <result property="applicationNo" column="application_no"/>
+        <result property="chineseName" column="chinese_name"/>
+        <result property="englishName" column="english_name"/>
+        <result property="gender" column="gender"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="nationality" column="nationality"/>
+        <result property="nativeLanguage" column="native_language"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="wechat" column="wechat"/>
+        <result property="passportNo" column="passport_no"/>
+        <result property="passportCountry" column="passport_country"/>
+        <result property="passportIssueDate" column="passport_issue_date"/>
+        <result property="passportExpireDate" column="passport_expire_date"/>
+        <result property="college" column="college"/>
+        <result property="major" column="major"/>
+        <result property="degreeLevel" column="degree_level"/>
+        <result property="grade" column="grade"/>
+        <result property="className" column="class_name"/>
+        <result property="enrollmentDate" column="enrollment_date"/>
+        <result property="expectedGraduationDate" column="expected_graduation_date"/>
+        <result property="studentStatus" column="student_status"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="remark" column="remark"/>
+        <result property="status" column="status"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, student_no, application_no, chinese_name, english_name, gender, birth_date, nationality,
+        native_language, email, phone, wechat, passport_no, passport_country, passport_issue_date,
+        passport_expire_date, college, major, degree_level, grade, class_name, enrollment_date,
+        expected_graduation_date, student_status, avatar_url, remark, status, deleted, create_time, update_time
+    </sql>
+
+    <sql id="Query_Where">
+        WHERE deleted = 0
+        <if test="query.studentNo != null and query.studentNo != ''">
+            AND student_no LIKE CONCAT('%', #{query.studentNo}, '%')
+        </if>
+        <if test="query.chineseName != null and query.chineseName != ''">
+            AND chinese_name LIKE CONCAT('%', #{query.chineseName}, '%')
+        </if>
+        <if test="query.englishName != null and query.englishName != ''">
+            AND english_name LIKE CONCAT('%', #{query.englishName}, '%')
+        </if>
+        <if test="query.nationality != null and query.nationality != ''">
+            AND nationality = #{query.nationality}
+        </if>
+        <if test="query.college != null and query.college != ''">
+            AND college LIKE CONCAT('%', #{query.college}, '%')
+        </if>
+        <if test="query.major != null and query.major != ''">
+            AND major LIKE CONCAT('%', #{query.major}, '%')
+        </if>
+        <if test="query.studentStatus != null and query.studentStatus != ''">
+            AND student_status = #{query.studentStatus}
+        </if>
+        <if test="query.status != null">
+            AND status = #{query.status}
+        </if>
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.student.entity.StudentProfile" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_profile (
+            user_id, student_no, application_no, chinese_name, english_name, gender, birth_date, nationality,
+            native_language, email, phone, wechat, passport_no, passport_country, passport_issue_date,
+            passport_expire_date, college, major, degree_level, grade, class_name, enrollment_date,
+            expected_graduation_date, student_status, avatar_url, remark, status
+        ) VALUES (
+            #{userId}, #{studentNo}, #{applicationNo}, #{chineseName}, #{englishName}, #{gender}, #{birthDate}, #{nationality},
+            #{nativeLanguage}, #{email}, #{phone}, #{wechat}, #{passportNo}, #{passportCountry}, #{passportIssueDate},
+            #{passportExpireDate}, #{college}, #{major}, #{degreeLevel}, #{grade}, #{className}, #{enrollmentDate},
+            #{expectedGraduationDate}, #{studentStatus}, #{avatarUrl}, #{remark}, #{status}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.student.entity.StudentProfile">
+        UPDATE student_profile
+        <set>
+            user_id = #{userId},
+            <if test="studentNo != null and studentNo != ''">student_no = #{studentNo},</if>
+            application_no = #{applicationNo},
+            chinese_name = #{chineseName},
+            <if test="englishName != null and englishName != ''">english_name = #{englishName},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            birth_date = #{birthDate},
+            <if test="nationality != null and nationality != ''">nationality = #{nationality},</if>
+            native_language = #{nativeLanguage},
+            email = #{email},
+            phone = #{phone},
+            wechat = #{wechat},
+            passport_no = #{passportNo},
+            passport_country = #{passportCountry},
+            passport_issue_date = #{passportIssueDate},
+            passport_expire_date = #{passportExpireDate},
+            college = #{college},
+            major = #{major},
+            degree_level = #{degreeLevel},
+            grade = #{grade},
+            class_name = #{className},
+            enrollment_date = #{enrollmentDate},
+            expected_graduation_date = #{expectedGraduationDate},
+            <if test="studentStatus != null and studentStatus != ''">student_status = #{studentStatus},</if>
+            avatar_url = #{avatarUrl},
+            remark = #{remark},
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE student_profile SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectById" resultMap="StudentProfileResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_profile WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectPage" resultMap="StudentProfileResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM student_profile
+        <include refid="Query_Where"/>
+        ORDER BY create_time DESC, id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(1)
+        FROM student_profile
+        <include refid="Query_Where"/>
+    </select>
+
+    <select id="selectByStudentNo" resultMap="StudentProfileResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_profile WHERE student_no = #{studentNo} AND deleted = 0 LIMIT 1
+    </select>
+
+    <select id="selectByUserId" resultMap="StudentProfileResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_profile WHERE user_id = #{userId} AND deleted = 0 LIMIT 1
+    </select>
+
+    <update id="updateStatus">
+        UPDATE student_profile SET student_status = #{studentStatus}, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+</mapper>

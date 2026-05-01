@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.student.mapper.StudentContactMapper">
+    <resultMap id="StudentContactResultMap" type="com.wenjie.modules.student.entity.StudentContact">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="contactType" column="contact_type"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="relationship" column="relationship"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="address" column="address"/>
+        <result property="isPrimary" column="is_primary"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, student_id, contact_type, contact_name, relationship, phone, email, address, is_primary, deleted, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.student.entity.StudentContact" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_contact (student_id, contact_type, contact_name, relationship, phone, email, address, is_primary)
+        VALUES (#{studentId}, #{contactType}, #{contactName}, #{relationship}, #{phone}, #{email}, #{address}, #{isPrimary})
+    </insert>
+
+    <update id="updateById" parameterType="com.wenjie.modules.student.entity.StudentContact">
+        UPDATE student_contact
+        <set>
+            <if test="contactType != null and contactType != ''">contact_type = #{contactType},</if>
+            <if test="contactName != null and contactName != ''">contact_name = #{contactName},</if>
+            relationship = #{relationship},
+            phone = #{phone},
+            email = #{email},
+            address = #{address},
+            <if test="isPrimary != null">is_primary = #{isPrimary},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE student_contact SET deleted = 1, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="selectByStudentId" resultMap="StudentContactResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_contact WHERE student_id = #{studentId} AND deleted = 0 ORDER BY is_primary DESC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="StudentContactResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_contact WHERE id = #{id} AND deleted = 0
+    </select>
+</mapper>

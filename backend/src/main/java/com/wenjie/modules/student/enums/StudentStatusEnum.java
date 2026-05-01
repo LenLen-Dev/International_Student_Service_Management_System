@@ -1,0 +1,30 @@
+/**
+ * @projectName: International_Student_Service_Management_System
+ * @package: com.wenjie.modules.student.enums
+ * @className: StudentStatusEnum
+ * @description: TODO 留学生状态枚举
+ * @author: Wenjie
+ * @createDate: 2026-04-30 00:00
+ * @updateUser: Wenjie
+ * @updateDate: 2026-04-30 00:00
+ * @updateRemark: The modified content
+ * @version: 1.0
+ * <p>Copyright: Copyright (c) 2026 </p>
+ */
+package com.wenjie.modules.student.enums;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum StudentStatusEnum {
+    PRE_ADMITTED("预录取"),
+    ENROLLED("在读"),
+    SUSPENDED("休学"),
+    GRADUATED("已毕业"),
+    DROPPED("退学"),
+    LEFT("已离校");
+
+    private final String label;
+}

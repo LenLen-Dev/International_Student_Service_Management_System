@@ -86,6 +86,7 @@ const modules = [
   {
     title: '留学生档案',
     description: '留学生基础信息与档案业务入口',
+    path: '/student/profiles',
     icon: Collection,
     color: 'cyan'
   },

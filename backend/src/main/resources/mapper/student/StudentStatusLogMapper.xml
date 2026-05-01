@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wenjie.modules.student.mapper.StudentStatusLogMapper">
+    <resultMap id="StudentStatusLogResultMap" type="com.wenjie.modules.student.entity.StudentStatusLog">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="oldStatus" column="old_status"/>
+        <result property="newStatus" column="new_status"/>
+        <result property="changeReason" column="change_reason"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark" column="remark"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, student_id, old_status, new_status, change_reason, operator_id, operator_name, remark, deleted, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.wenjie.modules.student.entity.StudentStatusLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student_status_log (student_id, old_status, new_status, change_reason, operator_id, operator_name, remark)
+        VALUES (#{studentId}, #{oldStatus}, #{newStatus}, #{changeReason}, #{operatorId}, #{operatorName}, #{remark})
+    </insert>
+
+    <select id="selectByStudentId" resultMap="StudentStatusLogResultMap">
+        SELECT <include refid="Base_Column_List"/> FROM student_status_log WHERE student_id = #{studentId} AND deleted = 0 ORDER BY create_time DESC, id DESC
+    </select>
+</mapper>

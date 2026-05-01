@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wenjie.mapper.SysRoleMapper">
-    <resultMap id="SysRoleResultMap" type="com.wenjie.entity.SysRole">
+<mapper namespace="com.wenjie.modules.system.mapper.SysRoleMapper">
+    <resultMap id="SysRoleResultMap" type="com.wenjie.modules.system.entity.SysRole">
         <id property="id" column="id"/>
         <result property="roleCode" column="role_code"/>
         <result property="roleName" column="role_name"/>
@@ -36,12 +36,12 @@
         ORDER BY sort ASC, id ASC
     </select>
 
-    <insert id="insert" parameterType="com.wenjie.entity.SysRole" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.wenjie.modules.system.entity.SysRole" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sys_role (role_code, role_name, description, status, sort)
         VALUES (#{roleCode}, #{roleName}, #{description}, #{status}, #{sort})
     </insert>
 
-    <update id="update" parameterType="com.wenjie.entity.SysRole">
+    <update id="update" parameterType="com.wenjie.modules.system.entity.SysRole">
         UPDATE sys_role
         <set>
             <if test="roleCode != null and roleCode != ''">role_code = #{roleCode},</if>

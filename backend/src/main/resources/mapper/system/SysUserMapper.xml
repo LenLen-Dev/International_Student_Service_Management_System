@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.wenjie.mapper.SysUserMapper">
-    <resultMap id="SysUserResultMap" type="com.wenjie.entity.SysUser">
+<mapper namespace="com.wenjie.modules.system.mapper.SysUserMapper">
+    <resultMap id="SysUserResultMap" type="com.wenjie.modules.system.entity.SysUser">
         <id property="id" column="id"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
@@ -15,7 +15,7 @@
         <result property="deleted" column="deleted"/>
     </resultMap>
 
-    <resultMap id="SysMenuResultMap" type="com.wenjie.entity.SysMenu">
+    <resultMap id="SysMenuResultMap" type="com.wenjie.modules.system.entity.SysMenu">
         <id property="id" column="id"/>
         <result property="parentId" column="parent_id"/>
         <result property="menuName" column="menu_name"/>
@@ -65,12 +65,12 @@
         ORDER BY id DESC
     </select>
 
-    <insert id="insert" parameterType="com.wenjie.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.wenjie.modules.system.entity.SysUser" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sys_user (username, password, real_name, email, phone, user_type, status)
         VALUES (#{username}, #{password}, #{realName}, #{email}, #{phone}, #{userType}, #{status})
     </insert>
 
-    <update id="update" parameterType="com.wenjie.entity.SysUser">
+    <update id="update" parameterType="com.wenjie.modules.system.entity.SysUser">
         UPDATE sys_user
         <set>
             <if test="password != null and password != ''">password = #{password},</if>
